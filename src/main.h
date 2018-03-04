@@ -5,6 +5,7 @@
 #include <cmath>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -13,6 +14,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/vector_angle.hpp>
 
 struct color_t {
     int r;
@@ -21,6 +24,8 @@ struct color_t {
 };
 
 extern const float PI;
+extern bool lbutton_down;
+extern float previous_x_position, previous_y_position;
 
 // nonedit.cpp
 GLFWwindow *initGLFW(int width, int height);
@@ -75,6 +80,8 @@ struct bounding_box_t {
 
 bool detect_collision(bounding_box_t a, bounding_box_t b);
 
+void inputHandler(int key, int action);
+void scrollHandler(double offset);
 extern float screen_zoom, screen_center_x, screen_center_y;
 void reset_screen();
 

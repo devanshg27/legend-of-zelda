@@ -19,11 +19,20 @@ Boat boat1;
 Sea sea1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
+bool lbutton_down = false;
+float previous_x_position, previous_y_position;
+int cameraView = 3;
+// Camera View can take values:
+// 0 = Boat View
+// 1 = Top View
+// 2 = Tower View
+// 3 = Follow-cam View
+// 4 = Helicopter-cam View
 
 Timer t60(1.0 / 60);
 
 const float PI = acos(-1);
-
+glm::vec3 curEye, curTarget;
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
 void draw() {
@@ -34,12 +43,50 @@ void draw() {
     // Don't change unless you know what you are doing
     glUseProgram (programID);
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye ( 5, 0, 4);
+    glm::vec3 eye ( 5, 0, 7);
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target (0, 0, 0);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 0, 1);
 
+    if(cameraView == 0) {
+        eye = boat1.position;
+        eye.x -= 6*cos(PI * boat1.rotation / 180.0);
+        eye.y -= 6*sin(PI * boat1.rotation / 180.0);
+        eye.z += 2;
+        target = eye;
+        target.x -= 2*cos(PI * boat1.rotation / 180.0);
+        target.y -= 2*sin(PI * boat1.rotation / 180.0);
+    }
+    else if(cameraView == 1) {
+        target = boat1.position;
+        eye = boat1.position;
+        eye.z = 30;
+        up.x = -cos(PI * boat1.rotation / 180.0);
+        up.y = -sin(PI * boat1.rotation / 180.0);
+        up.z = 0;
+    }
+    else if(cameraView == 2) {
+        eye.x = 100;
+        eye.y = 100;
+        eye.z = 60;
+        target = boat1.position;
+        target.z = 2;
+    }
+    else if(cameraView == 3) {
+        target = boat1.position;
+        target.z = 2;
+        eye = boat1.position;
+        eye.x += 14*cos(PI * boat1.rotation / 180.0);
+        eye.y += 14*sin(PI * boat1.rotation / 180.0);
+        eye.z = 8;
+        curEye = eye;
+        curTarget = target;
+    }
+    else if(cameraView == 4) {
+        eye = curEye;
+        target = curTarget;
+    }
     // Compute Camera matrix (view)
     Matrices.view = glm::lookAt( eye, target, up ); // Rotating Camera for 3D
     // Don't change unless you are sure!!
@@ -63,8 +110,59 @@ void draw() {
 void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
-    if (left) {
-        // Do something
+    int up  = glfwGetKey(window, GLFW_KEY_UP);
+    int down = glfwGetKey(window, GLFW_KEY_DOWN);
+    if (up) {
+        boat1.velocity = 0.35;
+    }
+    if (down) {
+        boat1.velocity = -0.15;
+    }
+    if(left) {
+        boat1.rotation += 0.8;
+    }
+    if(right) {
+        boat1.rotation -= 0.8;
+    }
+    if(cameraView != 4) return;
+    if(lbutton_down) {
+        double x;
+        double y;
+        glfwGetCursorPos(window, &x, &y);
+        if(x > previous_x_position) {
+            glm::vec3 dir = curTarget - curEye;
+            glm::vec3 temp = glm::cross(dir, glm::vec3(0, 0, 1));
+            glm::vec3 normal = glm::cross(temp, dir);
+            dir = glm::rotate(dir, -PI/180.0f, normal);
+            curTarget = dir + curEye;
+        }
+        else if(x < previous_x_position){
+            glm::vec3 dir = curTarget - curEye;
+            glm::vec3 temp = glm::cross(dir, glm::vec3(0, 0, 1));
+            glm::vec3 normal = glm::cross(temp, dir);
+            dir = glm::rotate(dir, PI/180.0f, normal);
+            curTarget = dir + curEye;
+        }
+        if(y > previous_y_position) {
+            glm::vec3 dir = curTarget - curEye;
+            glm::vec3 normal = glm::cross(dir, glm::vec3(0, 0, 1));
+            dir = glm::rotate(dir, -PI/180.0f, normal);
+            float ang = acos(glm::dot(dir, glm::vec3(0, 0, 1))/(glm::length(dir)));
+            if(ang > 0.7 and ang < 3) {
+                curTarget = dir + curEye;
+            }
+        }
+        else if(y < previous_y_position){
+            glm::vec3 dir = curTarget - curEye;
+            glm::vec3 normal = glm::cross(dir, glm::vec3(0, 0, 1));
+            dir = glm::rotate(dir, PI/180.0f, normal);
+            float ang = acos(glm::dot(dir, glm::vec3(0, 0, 1))/(glm::length(dir)));
+            if(ang > 0.7 and ang < 3) {
+                curTarget = dir + curEye;
+            }
+        }
+        previous_x_position = x;
+        previous_y_position = y;
     }
 }
 
@@ -105,6 +203,38 @@ void initGL(GLFWwindow *window, int width, int height) {
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 }
 
+void inputHandler(int key, int action) {
+    if(key == GLFW_KEY_V) {
+        if(action == GLFW_PRESS) {
+            cameraView = (cameraView + 1) % 5;
+        }
+        else if(action == GLFW_RELEASE) {
+            // Do something
+        }
+    }
+    if(key == GLFW_KEY_SPACE) {
+        if(action == GLFW_PRESS) {
+            if(boat1.position.z < 0.01) {
+                boat1.upVelocity = 0.5;
+            }
+        }
+        else if(action == GLFW_RELEASE) {
+            // Do something
+        }
+    }
+}
+
+void scrollHandler(double offset) {
+    if(cameraView != 4) return;
+    glm::vec3 dir;
+    if(offset > 0) dir = curTarget - curEye;
+    else if(offset < 0) dir = curEye - curTarget;
+    else return;
+    dir = dir/(10*sqrt((dir.x*dir.x)+(dir.y*dir.y)+(dir.z*dir.z)));
+    curEye = dir + curEye;
+    curTarget = dir + curTarget;
+    curEye.z = std::max(1.0f, curEye.z);
+}
 
 int main(int argc, char **argv) {
     srand(time(0));

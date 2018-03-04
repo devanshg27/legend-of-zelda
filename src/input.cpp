@@ -23,7 +23,7 @@ using namespace std;
 /* Prefered for Keyboard events */
 void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
     // Function is called first on GLFW_PRESS.
-
+    inputHandler(key, action);
     if (action == GLFW_RELEASE) {
         // switch (key) {
         // case GLFW_KEY_C:
@@ -64,24 +64,30 @@ void keyboardChar(GLFWwindow *window, unsigned int key) {
 /* Executed when a mouse button is pressed/released */
 void mouseButton(GLFWwindow *window, int button, int action, int mods) {
     switch (button) {
-    case GLFW_MOUSE_BUTTON_LEFT:
-        if (action == GLFW_PRESS) {
-            // Do something
-            return;
-        } else if (action == GLFW_RELEASE) {
-            // Do something
-        }
+        case GLFW_MOUSE_BUTTON_LEFT:
+            if (action == GLFW_PRESS) {
+                double x;
+                double y;
+                glfwGetCursorPos(window, &x, &y);
+                previous_x_position = x;
+                previous_y_position = y;
+                lbutton_down = true;
+            }
+            else if (action == GLFW_RELEASE) {
+                lbutton_down = false;
+            }
         break;
-    // case GLFW_MOUSE_BUTTON_RIGHT:
-    // if (action == GLFW_RELEASE) {
-    // rectangle_rot_dir *= -1;
-    // }
-    // break;
-    default:
-        break;
+        // case GLFW_MOUSE_BUTTON_RIGHT:
+            // if (action == GLFW_RELEASE) {
+            // rectangle_rot_dir *= -1;
+            // }
+        // break;
+        default:
+            break;
     }
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+    scrollHandler(yoffset);
     // Do something
 }

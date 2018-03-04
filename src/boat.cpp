@@ -2,15 +2,16 @@
 #include "main.h"
 
 Boat::Boat(float x, float y, color_t color) {
-    this->position = glm::vec3(x, y, 0);
+    speed = -0.025f;
+    this->position = glm::vec3(x, y, 2*speed);
     this->rotation = 0;
-    speed = 0.02f;
+    this->upVelocity = -1;
     GLfloat vertex_buffer_data[9*2*10*11];
     double bentSine[11];
 
     for(int i=0; i<=10; ++i) {
         double ang = 0.8+((i/10.0)*(PI-0.8));
-        bentSine[10-i] = 2*atan(sin(ang)/(2.0 - cos(ang)));
+        bentSine[10-i] = sin(ang)+0*2*atan(sin(ang)/(2.0 - cos(ang)));
     }
 
     for(int i=0; i<10; ++i) {
@@ -22,53 +23,53 @@ Boat::Boat(float x, float y, color_t color) {
             float xCord = (j-4);
 
             vertex_buffer_data[(18*11*i)+(18*j)+0] = prevxCord;
-            vertex_buffer_data[(18*11*i)+(18*j)+1] = 4*bentSine[j]*(prevyCord);
-            vertex_buffer_data[(18*11*i)+(18*j)+2] = 10 * prevyCord * prevyCord;
+            vertex_buffer_data[(18*11*i)+(18*j)+1] = 3.5*bentSine[j]*(prevyCord);
+            vertex_buffer_data[(18*11*i)+(18*j)+2] = 8 * prevyCord * prevyCord;
 
             vertex_buffer_data[(18*11*i)+(18*j)+3] = xCord;
-            vertex_buffer_data[(18*11*i)+(18*j)+4] = 4*bentSine[j+1]*(yCord);
-            vertex_buffer_data[(18*11*i)+(18*j)+5] = 10 * yCord * yCord;
+            vertex_buffer_data[(18*11*i)+(18*j)+4] = 3.5*bentSine[j+1]*(yCord);
+            vertex_buffer_data[(18*11*i)+(18*j)+5] = 8 * yCord * yCord;
 
             vertex_buffer_data[(18*11*i)+(18*j)+6] = prevxCord;
-            vertex_buffer_data[(18*11*i)+(18*j)+7] = 4*bentSine[j]*(yCord);
-            vertex_buffer_data[(18*11*i)+(18*j)+8] = 10 * yCord * yCord;
+            vertex_buffer_data[(18*11*i)+(18*j)+7] = 3.5*bentSine[j]*(yCord);
+            vertex_buffer_data[(18*11*i)+(18*j)+8] = 8 * yCord * yCord;
 
             vertex_buffer_data[(18*11*i)+(18*j)+9] = prevxCord;
-            vertex_buffer_data[(18*11*i)+(18*j)+10] = 4*bentSine[j]*(prevyCord);
-            vertex_buffer_data[(18*11*i)+(18*j)+11] = 10 * prevyCord * prevyCord;
+            vertex_buffer_data[(18*11*i)+(18*j)+10] = 3.5*bentSine[j]*(prevyCord);
+            vertex_buffer_data[(18*11*i)+(18*j)+11] = 8 * prevyCord * prevyCord;
 
             vertex_buffer_data[(18*11*i)+(18*j)+12] = xCord;
-            vertex_buffer_data[(18*11*i)+(18*j)+13] = 4*bentSine[j+1]*(prevyCord);
-            vertex_buffer_data[(18*11*i)+(18*j)+14] = 10 * prevyCord * prevyCord;
+            vertex_buffer_data[(18*11*i)+(18*j)+13] = 3.5*bentSine[j+1]*(prevyCord);
+            vertex_buffer_data[(18*11*i)+(18*j)+14] = 8 * prevyCord * prevyCord;
 
             vertex_buffer_data[(18*11*i)+(18*j)+15] = xCord;
-            vertex_buffer_data[(18*11*i)+(18*j)+16] = 4*bentSine[j+1]*(yCord);
-            vertex_buffer_data[(18*11*i)+(18*j)+17] = 10 * yCord * yCord;
+            vertex_buffer_data[(18*11*i)+(18*j)+16] = 3.5*bentSine[j+1]*(yCord);
+            vertex_buffer_data[(18*11*i)+(18*j)+17] = 8 * yCord * yCord;
         }
 
         vertex_buffer_data[(18*11*i)+(180)+0] = 5;
-        vertex_buffer_data[(18*11*i)+(180)+1] = 4*bentSine[10]*(prevyCord);
-        vertex_buffer_data[(18*11*i)+(180)+2] = 10 * prevyCord * prevyCord;
+        vertex_buffer_data[(18*11*i)+(180)+1] = 3.5*bentSine[10]*(prevyCord);
+        vertex_buffer_data[(18*11*i)+(180)+2] = 8 * prevyCord * prevyCord;
 
         vertex_buffer_data[(18*11*i)+(180)+3] = 5;
         vertex_buffer_data[(18*11*i)+(180)+4] = 0;
-        vertex_buffer_data[(18*11*i)+(180)+5] = 10 * yCord * yCord;
+        vertex_buffer_data[(18*11*i)+(180)+5] = 8 * yCord * yCord;
 
         vertex_buffer_data[(18*11*i)+(180)+6] = 5;
-        vertex_buffer_data[(18*11*i)+(180)+7] = 4*bentSine[10]*(yCord);
-        vertex_buffer_data[(18*11*i)+(180)+8] = 10 * yCord * yCord;
+        vertex_buffer_data[(18*11*i)+(180)+7] = 3.5*bentSine[10]*(yCord);
+        vertex_buffer_data[(18*11*i)+(180)+8] = 8 * yCord * yCord;
 
         vertex_buffer_data[(18*11*i)+(180)+9] = 5;
-        vertex_buffer_data[(18*11*i)+(180)+10] = 4*bentSine[10]*(prevyCord);
-        vertex_buffer_data[(18*11*i)+(180)+11] = 10 * prevyCord * prevyCord;
+        vertex_buffer_data[(18*11*i)+(180)+10] = 3.5*bentSine[10]*(prevyCord);
+        vertex_buffer_data[(18*11*i)+(180)+11] = 8 * prevyCord * prevyCord;
 
         vertex_buffer_data[(18*11*i)+(180)+12] = 5;
         vertex_buffer_data[(18*11*i)+(180)+13] = 0;
-        vertex_buffer_data[(18*11*i)+(180)+14] = 10 * prevyCord * prevyCord;
+        vertex_buffer_data[(18*11*i)+(180)+14] = 8 * prevyCord * prevyCord;
 
         vertex_buffer_data[(18*11*i)+(180)+15] = 5;
         vertex_buffer_data[(18*11*i)+(180)+16] = 0;
-        vertex_buffer_data[(18*11*i)+(180)+17] = 10 * yCord * yCord;
+        vertex_buffer_data[(18*11*i)+(180)+17] = 8 * yCord * yCord;
     }
 
     this->object = create3DObject(GL_TRIANGLES, (sizeof(vertex_buffer_data)/(3*sizeof(vertex_buffer_data[0]))), vertex_buffer_data, color, GL_FILL);
@@ -77,7 +78,7 @@ Boat::Boat(float x, float y, color_t color) {
 void Boat::draw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
-    glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
+    glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
     Matrices.model *= (translate * rotate);
@@ -91,9 +92,22 @@ void Boat::set_position(float x, float y) {
 }
 
 void Boat::tick() {
-    // this->rotation += speed;
-    // this->position.x -= speed;
-    this->position.z -= speed;
-    if(fabs(this->position.z) > 0.4) speed = -speed;
+    this->position.x -= velocity * cos(this->rotation * PI / 180.0f);
+    this->position.y -= velocity * sin(this->rotation * PI / 180.0f);
+    if(this->velocity > 0) {
+        this->velocity = std::max(0.0, this->velocity - 0.004);
+    }
+    else if(this->velocity < 0) {
+        this->velocity = std::min(0.0, this->velocity + 0.004);
+    }
+    if(this->upVelocity >= 0 or this->position.z > 0) {
+        this->position.z += this->upVelocity;
+        this->upVelocity -= 0.02;
+        this->position.z = std::max(this->position.z, -0.48f);
+    }
+    else {
+        if(this->position.z < -0.5 or this->position.z >= -0.03) speed = -speed;
+        this->position.z -= speed;
+    }
 }
 
