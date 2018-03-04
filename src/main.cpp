@@ -1,8 +1,12 @@
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "timer.h"
 #include "ball.h"
 #include "boat.h"
 #include "sea.h"
+#include "audio.h"
 
 using namespace std;
 
@@ -110,6 +114,17 @@ void draw() {
 
     glUseProgram (textureProgramID);
     sea1.draw(VP);
+}
+
+void startAudioPlayer() {
+    int forkPid = fork();
+    if(forkPid == -1) {
+        printf("Error occurred during forking.\n");
+        exit(0);
+    }
+    if( forkPid == 0 ) {
+        playAudio();
+    }
 }
 
 void tick_input(GLFWwindow *window) {
@@ -255,6 +270,8 @@ int main(int argc, char **argv) {
     int width  = 1600;
     int height = 900;
 
+    startAudioPlayer();
+
     window = initGLFW(width, height);
 
     initGL (window, width, height);
@@ -279,6 +296,7 @@ int main(int argc, char **argv) {
     }
 
     quit(window);
+    exit(0);
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
