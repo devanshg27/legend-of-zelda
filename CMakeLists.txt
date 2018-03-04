@@ -33,4 +33,7 @@ endif()
 
 configure_file(src/Sample_GL.vert Sample_GL.vert COPYONLY)
 configure_file(src/Sample_GL.frag Sample_GL.frag COPYONLY)
+configure_file(src/TransformVertexShader.vertexshader TransformVertexShader.vertexshader COPYONLY)
+configure_file(src/TextureFragmentShader.fragmentshader TextureFragmentShader.fragmentshader COPYONLY)
+configure_file(assets/uvtemplate.dds uvtemplate.dds COPYONLY)
 # configure_file(assets/song.mp3 assets/song.mp3 COPYONLY)

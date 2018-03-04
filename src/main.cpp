@@ -8,6 +8,8 @@ using namespace std;
 
 GLMatrices Matrices;
 GLuint     programID;
+GLuint     textureProgramID;
+GLuint textureMatrixID;
 GLFWwindow *window;
 GLuint TextureID;
 
@@ -104,8 +106,10 @@ void draw() {
 
     // Scene render
     ball1.draw(VP);
-    sea1.draw(VP);
     boat1.draw(VP);
+
+    glUseProgram (textureProgramID);
+    sea1.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -185,9 +189,13 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
+    textureProgramID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
+
     // Get a handle for our "MVP" uniform
     Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
-    TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+    // Get a handle for our "MVP" uniform
+    textureMatrixID = glGetUniformLocation(textureProgramID, "MVP");
+    TextureID  = glGetUniformLocation(textureProgramID, "myTextureSampler");
 
 
     reshapeWindow (window, width, height);

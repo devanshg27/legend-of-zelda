@@ -68,6 +68,7 @@ struct GLMatrices {
 
 extern GLMatrices Matrices;
 extern GLuint TextureID;
+extern GLuint textureMatrixID;
 
 // ---- Logic ----
 
