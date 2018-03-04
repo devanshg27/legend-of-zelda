@@ -34,7 +34,7 @@ void draw() {
     // Don't change unless you know what you are doing
     glUseProgram (programID);
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye ( 5, 0, 2);
+    glm::vec3 eye ( 5, 0, 4);
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
     glm::vec3 target (0, 0, 0);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
@@ -56,8 +56,8 @@ void draw() {
 
     // Scene render
     ball1.draw(VP);
-    boat1.draw(VP);
     sea1.draw(VP);
+    boat1.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -81,7 +81,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     // Create the models
 
     ball1 = Ball(0, 0, COLOR_RED);
-    boat1 = Boat(0, 4, COLOR_BLACK);
+    boat1 = Boat(-15, 0, COLOR_BLACK);
     sea1 = Sea(0, 2, COLOR_BLUE);
 
     // Create and compile our GLSL program from the shaders
