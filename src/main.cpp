@@ -230,10 +230,14 @@ void scrollHandler(double offset) {
     if(offset > 0) dir = curTarget - curEye;
     else if(offset < 0) dir = curEye - curTarget;
     else return;
-    dir = dir/(10*sqrt((dir.x*dir.x)+(dir.y*dir.y)+(dir.z*dir.z)));
+    dir = dir/(10*glm::length(dir));
     curEye = dir + curEye;
     curTarget = dir + curTarget;
-    curEye.z = std::max(1.0f, curEye.z);
+    if(curEye.z < 1.0f) {
+        curTarget.z += 1.0f - curEye.z;
+        curEye.z = 1.0f;
+    }
+
 }
 
 int main(int argc, char **argv) {
