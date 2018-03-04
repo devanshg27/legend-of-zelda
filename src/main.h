@@ -31,9 +31,10 @@ extern float previous_x_position, previous_y_position;
 GLFWwindow *initGLFW(int width, int height);
 GLuint     LoadShaders(const char *vertex_file_path, const char *fragment_file_path);
 struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, const GLfloat *color_buffer_data, GLenum fill_mode = GL_FILL);
+struct VAO *createTextured3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, const GLfloat *uv_buffer_data, GLenum fill_mode = GL_FILL);
 struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, const GLfloat red, const GLfloat green, const GLfloat blue, GLenum fill_mode = GL_FILL);
 struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, const color_t color, GLenum fill_mode = GL_FILL);
-void       draw3DObject(struct VAO *vao);
+void       draw3DObject(struct VAO *vao, int isTextured = 0);
 
 // input.cpp
 void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -66,6 +67,7 @@ struct GLMatrices {
 };
 
 extern GLMatrices Matrices;
+extern GLuint TextureID;
 
 // ---- Logic ----
 

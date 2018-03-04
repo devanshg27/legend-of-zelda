@@ -9,6 +9,7 @@ using namespace std;
 GLMatrices Matrices;
 GLuint     programID;
 GLFWwindow *window;
+GLuint TextureID;
 
 /**************************
 * Customizable functions *
@@ -186,6 +187,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     // Get a handle for our "MVP" uniform
     Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
+    TextureID  = glGetUniformLocation(programID, "myTextureSampler");
 
 
     reshapeWindow (window, width, height);
