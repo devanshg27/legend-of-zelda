@@ -1,4 +1,5 @@
 #include "main.h"
+#include "physics.h"
 
 #ifndef BOAT_H
 #define BOAT_H
@@ -20,6 +21,7 @@ public:
     void set_position(float x, float y);
     void tick();
     double speed;
+    boatBounding shape;
 private:
     VAO *object;
     VAO *mastObject;

@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 #include "main.h"
+#include "physics.h"
 #include "timer.h"
 #include "ball.h"
 #include "boat.h"
@@ -28,9 +29,10 @@ GLuint TextureID;
 char windowTitle[256];
 Ball ball1;
 Aim aim1;
+int health, score;
 Island island1;
 Boat boat1;
-Rock rocks[1000];
+vector<Rock> rocks;
 Sea sea1;
 int maskArr[256];
 glm::mat4 initVP;
@@ -41,6 +43,7 @@ bool lbutton_down = false;
 bool rbutton_down = false;
 float previous_x_position, previous_y_position;
 int cameraView = 3;
+int cnt, nxtShootcnt;
 // Camera View can take values:
 // 0 = Boat View
 // 1 = Top View
@@ -101,7 +104,7 @@ void draw() {
         eye = boat1.position;
         eye.x += 14*cos(PI * boat1.rotation / 180.0);
         eye.y += 14*sin(PI * boat1.rotation / 180.0);
-        eye.z = 8;
+        eye.z = 10;
         curEye = eye;
         curTarget = target;
     }
@@ -124,7 +127,7 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
-    ball1.draw(VP);
+    // ball1.draw(VP);
     boat1.draw(VP);
     island1.draw(VP);
     for(auto&z: displayList) {
@@ -134,8 +137,8 @@ void draw() {
         aim1.draw(initVP);
     }
 
-    for(int i=0; i<1000; ++i) {
-        rocks[i].draw(VP);
+    for(auto&z: rocks) {
+        z.draw(VP);
     }
 
     glUseProgram (textureProgramID);
@@ -171,7 +174,7 @@ void tick_input(GLFWwindow *window) {
     if(right) {
         boat1.rotation -= 0.8;
     }
-    if(cameraView != 4) return;
+    if(rbutton_down or cameraView != 4) return;
     if(lbutton_down) {
         double x;
         double y;
@@ -217,6 +220,11 @@ void tick_elements() {
     ball1.tick();
     boat1.tick();
     sea1.tick();
+    int oldRocksSz = rocks.size();
+    rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
+        return detect_collision(ro.shape, boat1.shape);
+    }), rocks.end());
+    health += (rocks.size() - oldRocksSz)*5;
 }
 
 void initMasks() {
@@ -258,8 +266,8 @@ void initGL(GLFWwindow *window, int width, int height) {
     sea1 = Sea(0, 2, COLOR_BLUE);
     island1 = Island(100, 100, color_t{255, 255, 141}, COLOR_RED);
     aim1 = Aim(0, 0, COLOR_BLACK);
-    for(int i=0; i<1000; ++i) {
-        rocks[i] = Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK);
+    for(int i=0; i<200; ++i) {
+        rocks.emplace_back(Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK));
     }
 
     initVP = glm::ortho(-4*16.0f/9, 4*16.0f/9, -4.0f, 4.0f, 0.1f, 500.0f) * glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
@@ -292,6 +300,10 @@ void initGL(GLFWwindow *window, int width, int height) {
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
 }
 
+void cannonShoot() {
+    nxtShootcnt = cnt + 120;
+}
+
 void inputHandler(int key, int action) {
     if(key == GLFW_KEY_V) {
         if(action == GLFW_PRESS) {
@@ -309,6 +321,11 @@ void inputHandler(int key, int action) {
         }
         else if(action == GLFW_RELEASE) {
             // Do something
+        }
+    }
+    if(rbutton_down and key == GLFW_KEY_F) {
+        if(action == GLFW_PRESS and nxtShootcnt < cnt) {
+            cannonShoot();
         }
     }
 }
@@ -333,7 +350,9 @@ int main(int argc, char **argv) {
     srand(time(0));
     int width  = 1600;
     int height = 900;
-    int cnt = 0;
+    score = 0;
+    health = 100;
+    cnt = 0, nxtShootcnt = -1;
 
     startAudioPlayer();
 
@@ -356,7 +375,12 @@ int main(int argc, char **argv) {
             tick_elements();
             tick_input(window);
 
-            sprintf(windowTitle, "SCORE-%d  HEALTH-%d", 0, 100);
+            sprintf(windowTitle, "SCORE-%d  HEALTH-%d", score, health);
+
+            if(health <= 0) {
+                printf("Yourif() score was %d.\n", score);
+                exit(0);
+            }
 
             for(int i=0; i<displayList.size(); ++i) {
                 displayList[i].mask = maskArr[' '];

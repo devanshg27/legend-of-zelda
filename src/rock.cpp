@@ -46,6 +46,8 @@ Rock::Rock(float x, float y, color_t color) {
     };
 
     this->object = create3DObject(GL_TRIANGLES, 12*3, vertex_buffer_data, color, GL_FILL);
+
+    this->shape = sphereBounding(this->position.x, this->position.y, this->position.z, 1.2f);
 }
 
 void Rock::draw(glm::mat4 VP) {

@@ -257,6 +257,10 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColo
     this->baseObject = create3DObject(GL_TRIANGLES, (sizeof(base_vertex_buffer_data)/(3*sizeof(base_vertex_buffer_data[0]))), base_vertex_buffer_data, baseColor, GL_FILL);
     this->sailObject = createTextured3DObject(GL_TRIANGLES, (sizeof(sail_vertex_buffer_data)/(3*sizeof(sail_vertex_buffer_data[0]))), sail_vertex_buffer_data, g_uv_buffer_data, GL_FILL);
     this->arrowObject = create3DObject(GL_TRIANGLES, (sizeof(arrow_vertex_buffer_data)/(3*sizeof(arrow_vertex_buffer_data[0]))), arrow_vertex_buffer_data, arrowColor, GL_FILL);
+
+    for(int i=0; i<(sizeof(base_vertex_buffer_data)/sizeof(base_vertex_buffer_data[0])); i+=3) {
+        this->shape.origPoints.push_back(glm::vec3(base_vertex_buffer_data[i], base_vertex_buffer_data[i+1], base_vertex_buffer_data[i+2]));
+    }
 }
 
 void Boat::draw(glm::mat4 VP) {
@@ -332,5 +336,13 @@ void Boat::tick() {
     }
     this->windRatio = std::min(1.0f, this->windRatio + 0.01f);
     this->mastRatio = std::min(1.0f, this->mastRatio + 0.04f);
+
+    this->shape.points.clear();
+    for(auto&z: this->shape.origPoints) {
+        glm::vec3 temp = z;
+        temp = glm::rotate(temp, (this->rotation * PI / 180.0f), glm::vec3(0, 0, 1));
+        temp += this->position;
+        this->shape.points.emplace_back(temp);
+    }
 }
 
