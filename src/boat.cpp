@@ -17,9 +17,9 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColo
     GLfloat vertex_buffer_data[9*2*10*11];
     GLfloat base_vertex_buffer_data[9*2*2*10];
     GLfloat sail_vertex_buffer_data[9*2*10*1];
-    GLfloat mast_vertex_buffer_data[9*2*2*11];
+    GLfloat g_uv_buffer_data[6*2*10*1];
+    GLfloat mast_vertex_buffer_data[9*2*2*10];
     GLfloat arrow_vertex_buffer_data[9*3];
-    GLfloat g_uv_buffer_data[6*2*2*11];
     double bentSine[11];
     this->Texture = loadDDS("dragon.dds");
 
@@ -279,7 +279,7 @@ void Boat::draw(glm::mat4 VP) {
     draw3DObject(this->arrowObject);
     glm::mat4 scale = glm::scale(glm::vec3(((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio))), ((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio))), ((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio)))));
     Matrices.model = glm::mat4(1.0f);
-    Matrices.model *= (translate * rotate * scale);
+    Matrices.model *= (translate * rotate);
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->mastObject);

@@ -6,6 +6,8 @@
 #include "ball.h"
 #include "boat.h"
 #include "sea.h"
+#include "rock.h"
+#include "island.h"
 #include "audio.h"
 
 using namespace std;
@@ -22,7 +24,9 @@ GLuint TextureID;
 **************************/
 
 Ball ball1;
+Island island1;
 Boat boat1;
+Rock rocks[1000];
 Sea sea1;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
@@ -111,6 +115,11 @@ void draw() {
     // Scene render
     ball1.draw(VP);
     boat1.draw(VP);
+    island1.draw(VP);
+
+    for(int i=0; i<1000; ++i) {
+        rocks[i].draw(VP);
+    }
 
     glUseProgram (textureProgramID);
     sea1.draw(VP);
@@ -200,8 +209,12 @@ void initGL(GLFWwindow *window, int width, int height) {
     // Create the models
 
     ball1 = Ball(0, 0, COLOR_RED);
-    boat1 = Boat(-15, 0, COLOR_BLACK, COLOR_RED, color_t{255, 87, 34});
+    boat1 = Boat(-15, 0, color_t{62, 39, 35}, COLOR_RED, color_t{255, 87, 34});
     sea1 = Sea(0, 2, COLOR_BLUE);
+    island1 = Island(100, 100, color_t{255, 255, 141}, COLOR_RED);
+    for(int i=0; i<1000; ++i) {
+        rocks[i] = Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK);
+    }
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
