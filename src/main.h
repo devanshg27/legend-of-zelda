@@ -24,7 +24,7 @@ struct color_t {
 };
 
 extern const float PI;
-extern bool lbutton_down;
+extern bool lbutton_down, rbutton_down;
 extern float previous_x_position, previous_y_position;
 
 // nonedit.cpp

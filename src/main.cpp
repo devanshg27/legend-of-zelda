@@ -10,6 +10,7 @@
 #include "island.h"
 #include "audio.h"
 #include "display.h"
+#include "aim.h"
 
 using namespace std;
 
@@ -26,6 +27,7 @@ GLuint TextureID;
 
 char windowTitle[256];
 Ball ball1;
+Aim aim1;
 Island island1;
 Boat boat1;
 Rock rocks[1000];
@@ -36,6 +38,7 @@ vector<Display> displayList;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 bool lbutton_down = false;
+bool rbutton_down = false;
 float previous_x_position, previous_y_position;
 int cameraView = 3;
 // Camera View can take values:
@@ -65,7 +68,10 @@ void draw() {
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 0, 1);
 
-    if(cameraView == 0) {
+    if(rbutton_down) {
+
+    }
+    else if(cameraView == 0) {
         eye = boat1.position;
         eye.x -= 6*cos(PI * boat1.rotation / 180.0);
         eye.y -= 6*sin(PI * boat1.rotation / 180.0);
@@ -123,6 +129,9 @@ void draw() {
     island1.draw(VP);
     for(auto&z: displayList) {
         z.draw(initVP);
+    }
+    if(rbutton_down) {
+        aim1.draw(initVP);
     }
 
     for(int i=0; i<1000; ++i) {
@@ -248,6 +257,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     boat1 = Boat(-15, 0, color_t{62, 39, 35}, COLOR_RED, color_t{255, 87, 34});
     sea1 = Sea(0, 2, COLOR_BLUE);
     island1 = Island(100, 100, color_t{255, 255, 141}, COLOR_RED);
+    aim1 = Aim(0, 0, COLOR_BLACK);
     for(int i=0; i<1000; ++i) {
         rocks[i] = Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK);
     }
