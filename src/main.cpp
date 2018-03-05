@@ -114,6 +114,7 @@ void draw() {
 
     glUseProgram (textureProgramID);
     sea1.draw(VP);
+    boat1.texturedDraw(VP);
 }
 
 void startAudioPlayer() {
@@ -199,7 +200,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     // Create the models
 
     ball1 = Ball(0, 0, COLOR_RED);
-    boat1 = Boat(-15, 0, COLOR_BLACK);
+    boat1 = Boat(-15, 0, COLOR_BLACK, COLOR_RED);
     sea1 = Sea(0, 2, COLOR_BLUE);
 
     // Create and compile our GLSL program from the shaders

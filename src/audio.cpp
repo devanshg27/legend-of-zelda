@@ -46,7 +46,6 @@ void playAudio(){
     while(1) {
         while (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK) {
             ao_play(dev, (char *)buffer, done);
-            fflush(stdout);
         }
         mpg123_seek(mh, 0, SEEK_SET);
     }
