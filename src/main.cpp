@@ -72,13 +72,20 @@ void draw() {
     glm::vec3 up (0, 0, 1);
 
     if(rbutton_down) {
-
+        eye = boat1.position;
+        eye.x -= 2.8*cos(PI * boat1.rotation / 180.0);
+        eye.y -= 2.8*sin(PI * boat1.rotation / 180.0);
+        eye.z += 3;
+        target = eye;
+        target.x -= 2*cos(PI * boat1.rotation / 180.0);
+        target.y -= 2*sin(PI * boat1.rotation / 180.0);
+        target.z += 2 * sin(PI * boat1.cannonRotation / 180.0);
     }
     else if(cameraView == 0) {
         eye = boat1.position;
         eye.x -= 6*cos(PI * boat1.rotation / 180.0);
         eye.y -= 6*sin(PI * boat1.rotation / 180.0);
-        eye.z += 2;
+        eye.z += 3;
         target = eye;
         target.x -= 2*cos(PI * boat1.rotation / 180.0);
         target.y -= 2*sin(PI * boat1.rotation / 180.0);
@@ -127,7 +134,7 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
-    // ball1.draw(VP);
+    ball1.draw(VP);
     boat1.draw(VP);
     island1.draw(VP);
     for(auto&z: displayList) {
@@ -173,6 +180,27 @@ void tick_input(GLFWwindow *window) {
     }
     if(right) {
         boat1.rotation -= 0.8;
+    }
+    if(rbutton_down) {
+        double x;
+        double y;
+        glfwGetCursorPos(window, &x, &y);
+        if(x > previous_x_position) {
+            boat1.rotation -= 0.8;
+        }
+        else if(x < previous_x_position){
+            boat1.rotation += 0.8;
+        }
+        if(y > previous_y_position) {
+            boat1.cannonRotation -= 0.8;
+            boat1.cannonRotation = max(boat1.cannonRotation, 0.0f);
+        }
+        else if(y < previous_y_position){
+            boat1.cannonRotation += 0.8;
+            boat1.cannonRotation = min(boat1.cannonRotation, 20.0f);
+        }
+        previous_x_position = x;
+        previous_y_position = y;
     }
     if(rbutton_down or cameraView != 4) return;
     if(lbutton_down) {
@@ -301,7 +329,11 @@ void initGL(GLFWwindow *window, int width, int height) {
 }
 
 void cannonShoot() {
-    nxtShootcnt = cnt + 120;
+    nxtShootcnt = cnt + 180;
+    ball1.position = boat1.position - glm::vec3(2.8*cos(PI * boat1.rotation / 180.0), 2.8*sin(PI * boat1.rotation / 180.0), -1.7);
+    ball1.velocity.x = -cos(PI * boat1.rotation / 180.0);
+    ball1.velocity.y = -sin(PI * boat1.rotation / 180.0);
+    ball1.velocity.z = 2*sin(PI * boat1.cannonRotation / 180.0);
 }
 
 void inputHandler(int key, int action) {
@@ -378,7 +410,7 @@ int main(int argc, char **argv) {
             sprintf(windowTitle, "SCORE-%d  HEALTH-%d", score, health);
 
             if(health <= 0) {
-                printf("Yourif() score was %d.\n", score);
+                printf("Your score was %d.\n", score);
                 exit(0);
             }
 

@@ -16,6 +16,7 @@ public:
     float windAngle;
     float mastScale, oldMastScale, mastRatio;
     float oldWindAngle, windRatio;
+    float cannonRotation;
     void draw(glm::mat4 VP);
     void texturedDraw(glm::mat4 VP);
     void set_position(float x, float y);
@@ -28,6 +29,7 @@ private:
     VAO *sailObject;
     VAO *baseObject;
     VAO *arrowObject;
+    VAO *cannonObject;
 };
 
 #endif // BOAT_H

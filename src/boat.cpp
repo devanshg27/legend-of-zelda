@@ -14,12 +14,14 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColo
     this->windAngle = 0;
     this->oldMastScale = 1;
     this->mastScale = 1;
+    this->cannonRotation = 0;
     GLfloat vertex_buffer_data[9*2*10*11];
     GLfloat base_vertex_buffer_data[9*2*2*10];
     GLfloat sail_vertex_buffer_data[9*2*10*1];
     GLfloat g_uv_buffer_data[6*2*10*1];
     GLfloat mast_vertex_buffer_data[9*2*2*10];
     GLfloat arrow_vertex_buffer_data[9*3];
+    GLfloat cannon_vertex_buffer_data[9*2*2*10];
     double bentSine[11];
     this->Texture = loadDDS("dragon.dds");
 
@@ -252,11 +254,64 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColo
     arrow_vertex_buffer_data[18+7] = arrowWidth;
     arrow_vertex_buffer_data[18+8] = 1;
 
+    for(int i=0; i<10; ++i) {
+        double prevAng = (2*i*PI/10.0);
+        double ang = (2*(i+1)*PI/10.0);
+        cannon_vertex_buffer_data[(18*i)+0] = -6.5;
+        cannon_vertex_buffer_data[(18*i)+1] = 0.3*sin(prevAng);
+        cannon_vertex_buffer_data[(18*i)+2] = 2 + 0.3*cos(prevAng);
+
+        cannon_vertex_buffer_data[(18*i)+3] = -3.5;
+        cannon_vertex_buffer_data[(18*i)+4] = 0.3*sin(ang);
+        cannon_vertex_buffer_data[(18*i)+5] = 2 + 0.3*cos(ang);
+
+        cannon_vertex_buffer_data[(18*i)+6] = -3.5;
+        cannon_vertex_buffer_data[(18*i)+7] = 0.3*sin(prevAng);
+        cannon_vertex_buffer_data[(18*i)+8] = 2 + 0.3*cos(prevAng);
+
+        cannon_vertex_buffer_data[(18*i)+9] =  -6.5;
+        cannon_vertex_buffer_data[(18*i)+10] = 0.3*sin(prevAng);
+        cannon_vertex_buffer_data[(18*i)+11] =2 + 0.3*cos(prevAng);
+
+        cannon_vertex_buffer_data[(18*i)+12] = -6.5;
+        cannon_vertex_buffer_data[(18*i)+13] = 0.3*sin(ang);
+        cannon_vertex_buffer_data[(18*i)+14] = 2 + 0.3*cos(ang);
+
+        cannon_vertex_buffer_data[(18*i)+15] = -3.5;
+        cannon_vertex_buffer_data[(18*i)+16] = 0.3*sin(ang);
+        cannon_vertex_buffer_data[(18*i)+17] = 2 + 0.3*cos(ang);
+
+        cannon_vertex_buffer_data[(18*10)+(18*i)+0] = -3.5;
+        cannon_vertex_buffer_data[(18*10)+(18*i)+1] = 0;
+        cannon_vertex_buffer_data[(18*10)+(18*i)+2] = 2;
+
+        cannon_vertex_buffer_data[(18*10)+(18*i)+3] = -3.5;
+        cannon_vertex_buffer_data[(18*10)+(18*i)+4] = 0.3*sin(ang);
+        cannon_vertex_buffer_data[(18*10)+(18*i)+5] = 2 + 0.3*cos(ang);
+
+        cannon_vertex_buffer_data[(18*10)+(18*i)+6] = -3.5;
+        cannon_vertex_buffer_data[(18*10)+(18*i)+7] = 0.3*sin(prevAng);
+        cannon_vertex_buffer_data[(18*10)+(18*i)+8] = 2 + 0.3*cos(prevAng);
+
+        cannon_vertex_buffer_data[(18*10)+(18*i)+9] = -6.5;
+        cannon_vertex_buffer_data[(18*10)+(18*i)+10] = 0;
+        cannon_vertex_buffer_data[(18*10)+(18*i)+11] = 2;
+
+        cannon_vertex_buffer_data[(18*10)+(18*i)+12] = -6.5;
+        cannon_vertex_buffer_data[(18*10)+(18*i)+13] = 0.3*sin(ang);
+        cannon_vertex_buffer_data[(18*10)+(18*i)+14] = 2 + 0.3*cos(ang);
+
+        cannon_vertex_buffer_data[(18*10)+(18*i)+15] = -6.5;
+        cannon_vertex_buffer_data[(18*10)+(18*i)+16] = 0.3*sin(prevAng);
+        cannon_vertex_buffer_data[(18*10)+(18*i)+17] = 2 + 0.3*cos(prevAng);
+    }
+
     this->object = create3DObject(GL_TRIANGLES, (sizeof(vertex_buffer_data)/(3*sizeof(vertex_buffer_data[0]))), vertex_buffer_data, color, GL_FILL);
     this->mastObject = create3DObject(GL_TRIANGLES, (sizeof(mast_vertex_buffer_data)/(3*sizeof(mast_vertex_buffer_data[0]))), mast_vertex_buffer_data, color, GL_FILL);
     this->baseObject = create3DObject(GL_TRIANGLES, (sizeof(base_vertex_buffer_data)/(3*sizeof(base_vertex_buffer_data[0]))), base_vertex_buffer_data, baseColor, GL_FILL);
     this->sailObject = createTextured3DObject(GL_TRIANGLES, (sizeof(sail_vertex_buffer_data)/(3*sizeof(sail_vertex_buffer_data[0]))), sail_vertex_buffer_data, g_uv_buffer_data, GL_FILL);
     this->arrowObject = create3DObject(GL_TRIANGLES, (sizeof(arrow_vertex_buffer_data)/(3*sizeof(arrow_vertex_buffer_data[0]))), arrow_vertex_buffer_data, arrowColor, GL_FILL);
+    this->cannonObject = create3DObject(GL_TRIANGLES, (sizeof(cannon_vertex_buffer_data)/(3*sizeof(cannon_vertex_buffer_data[0]))), cannon_vertex_buffer_data, color_t{0,0,0}, GL_FILL);
 
     for(int i=0; i<(sizeof(base_vertex_buffer_data)/sizeof(base_vertex_buffer_data[0])); i+=3) {
         this->shape.origPoints.push_back(glm::vec3(base_vertex_buffer_data[i], base_vertex_buffer_data[i+1], base_vertex_buffer_data[i+2]));
@@ -281,12 +336,18 @@ void Boat::draw(glm::mat4 VP) {
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->arrowObject);
-    glm::mat4 scale = glm::scale(glm::vec3(((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio))), ((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio))), ((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio)))));
     Matrices.model = glm::mat4(1.0f);
     Matrices.model *= (translate * rotate);
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->mastObject);
+    glm::mat4 cannonTranslate = glm::translate (glm::vec3(2.8, 0, 0));
+    glm::mat4 cannonRotate    = glm::rotate((float) ((this->cannonRotation) * M_PI / 180.0f), glm::vec3(0, 1, 0));
+    glm::mat4 cannonTranslateinv = glm::translate (glm::vec3(-2.8, 0, 0));
+    Matrices.model *= (cannonTranslateinv * cannonRotate * cannonTranslate);
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->cannonObject);
 }
 
 void Boat::texturedDraw(glm::mat4 VP) {
