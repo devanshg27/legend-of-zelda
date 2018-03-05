@@ -9,6 +9,7 @@
 #include "rock.h"
 #include "island.h"
 #include "audio.h"
+#include "display.h"
 
 using namespace std;
 
@@ -23,11 +24,15 @@ GLuint TextureID;
 * Customizable functions *
 **************************/
 
+char windowTitle[256];
 Ball ball1;
 Island island1;
 Boat boat1;
 Rock rocks[1000];
 Sea sea1;
+int maskArr[256];
+glm::mat4 initVP;
+vector<Display> displayList;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 bool lbutton_down = false;
@@ -116,6 +121,9 @@ void draw() {
     ball1.draw(VP);
     boat1.draw(VP);
     island1.draw(VP);
+    for(auto&z: displayList) {
+        z.draw(initVP);
+    }
 
     for(int i=0; i<1000; ++i) {
         rocks[i].draw(VP);
@@ -202,6 +210,34 @@ void tick_elements() {
     sea1.tick();
 }
 
+void initMasks() {
+    maskArr[' '] = 0;
+    maskArr['-'] = 0b10;
+    maskArr['A'] = 0b1111011;
+    maskArr['L'] = 0b101100;
+    maskArr['V'] = 0b11010000;
+    maskArr['H'] = 0b1111010;
+    maskArr['E'] = 0b101111;
+    maskArr['C'] = 0b101101;
+    maskArr['T'] = 0b101001;
+    maskArr['F'] = 0b101011;
+    maskArr['N'] = 0b11111000;
+    maskArr['m'] = 0b010101000;
+    maskArr['M'] = 0b101010000;
+    maskArr['R'] = 0b1111011;
+    maskArr['X'] = 0b110000000;
+    maskArr['0'] = maskArr['O'] = 0b1111101;
+    maskArr['I'] = maskArr['1'] = 0b1010000;
+    maskArr['2'] = 0b0110111;
+    maskArr['3'] = 0b1010111;
+    maskArr['4'] = 0b1011010;
+    maskArr['S'] = maskArr['5'] = 0b1001111;
+    maskArr['6'] = 0b1101111;
+    maskArr['7'] = 0b1010001;
+    maskArr['8'] = 0b1111111;
+    maskArr['9'] = 0b1011111;
+}
+
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
 void initGL(GLFWwindow *window, int width, int height) {
@@ -216,6 +252,8 @@ void initGL(GLFWwindow *window, int width, int height) {
         rocks[i] = Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK);
     }
 
+    initVP = glm::ortho(-4*16.0f/9, 4*16.0f/9, -4.0f, 4.0f, 0.1f, 500.0f) * glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
     textureProgramID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
@@ -226,7 +264,9 @@ void initGL(GLFWwindow *window, int width, int height) {
     textureMatrixID = glGetUniformLocation(textureProgramID, "MVP");
     TextureID  = glGetUniformLocation(textureProgramID, "myTextureSampler");
 
-
+    for(int i=0; i<100; ++i) {
+        displayList.push_back(Display((-4 * 16.0/9) + 0.1 + i*0.2, 3.8, COLOR_BLACK, maskArr[' ']));
+    }
     reshapeWindow (window, width, height);
 
     // Background color of the scene
@@ -289,6 +329,7 @@ int main(int argc, char **argv) {
 
     window = initGLFW(width, height);
 
+    initMasks();
     initGL (window, width, height);
 
     /* Draw in loop */
@@ -304,6 +345,17 @@ int main(int argc, char **argv) {
 
             tick_elements();
             tick_input(window);
+
+            sprintf(windowTitle, "SCORE-%d  HEALTH-%d", 0, 100);
+
+            for(int i=0; i<displayList.size(); ++i) {
+                displayList[i].mask = maskArr[' '];
+            }
+
+            for(int i=0; windowTitle[i]!='\0'; ++i) {
+                displayList[i].mask = maskArr[windowTitle[i]];
+            }
+
             ++cnt;
             if((cnt & 511) == 0) {
                 boat1.oldWindAngle = boat1.windAngle;
