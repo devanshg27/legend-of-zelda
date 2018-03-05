@@ -8,7 +8,7 @@ Island::Island(float x, float y, color_t color) {
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     GLfloat mast_vertex_buffer_data[9*2*2*30];
 
-    float mastHeight = 1.05;
+    float mastHeight = 0.8;
 
     for(int i=0; i<30; ++i) {
         double prevAng = (2*i*PI/30.0);

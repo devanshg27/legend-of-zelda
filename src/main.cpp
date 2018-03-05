@@ -10,6 +10,8 @@
 #include "rock.h"
 #include "island.h"
 #include "barrel.h"
+#include "health.h"
+#include "booster.h"
 #include "audio.h"
 #include "display.h"
 #include "aim.h"
@@ -35,6 +37,8 @@ Island island1;
 Boat boat1;
 vector<Rock> rocks;
 vector<Barrel> barrels;
+vector<Health> healths;
+vector<Booster> boosters;
 Sea sea1;
 int maskArr[256];
 glm::mat4 initVP;
@@ -46,6 +50,7 @@ bool rbutton_down = false;
 float previous_x_position, previous_y_position;
 int cameraView = 3;
 int cnt, nxtShootcnt;
+int boosterTimeLeft = -1;
 // Camera View can take values:
 // 0 = Boat View
 // 1 = Top View
@@ -154,6 +159,14 @@ void draw() {
         z.draw(VP);
     }
 
+    for(auto&z: healths) {
+        z.draw(VP);
+    }
+
+    for(auto&z: boosters) {
+        z.draw(VP);
+    }
+
     glUseProgram (textureProgramID);
     sea1.draw(VP);
     boat1.texturedDraw(VP);
@@ -177,6 +190,7 @@ void tick_input(GLFWwindow *window) {
     int down = glfwGetKey(window, GLFW_KEY_DOWN);
     if (up) {
         boat1.velocity = 0.25;
+        if(boosterTimeLeft>0) boat1.velocity = 0.4;
     }
     if (down) {
         boat1.velocity = -0.15;
@@ -257,6 +271,12 @@ void tick_elements() {
     for(auto&z: barrels) {
         z.tick();
     }
+    for(auto&z: healths) {
+        z.tick();
+    }
+    for(auto&z: boosters) {
+        z.tick();
+    }
     int oldRocksSz = rocks.size();
     rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
         return detect_collision(ro.shape, boat1.shape);
@@ -273,7 +293,26 @@ void tick_elements() {
             ++it;
         }
     }
-    health += (rocks.size() - oldRocksSz)*5;
+    health -= (oldRocksSz - rocks.size())*5;
+    for(auto it = healths.begin(); it != healths.end();) {
+        if(detect_collision(it->shape, boat1.shape)) {
+            if(health < 100) health = 100;
+            else health += 10;
+            it = healths.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+    for(auto it = boosters.begin(); it != boosters.end();) {
+        if(detect_collision(it->shape, boat1.shape)) {
+            boosterTimeLeft = 60 * 60;
+            it = boosters.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
 }
 
 void initMasks() {
@@ -300,7 +339,7 @@ void initMasks() {
     maskArr['S'] = maskArr['5'] = 0b1001111;
     maskArr['6'] = 0b1101111;
     maskArr['7'] = 0b1010001;
-    maskArr['8'] = 0b1111111;
+    maskArr['B'] = maskArr['8'] = 0b1111111;
     maskArr['9'] = 0b1011111;
 }
 
@@ -315,13 +354,26 @@ void initGL(GLFWwindow *window, int width, int height) {
     sea1 = Sea(0, 2, COLOR_BLUE);
     island1 = Island(100, 100, color_t{255, 255, 141});
     aim1 = Aim(0, 0, COLOR_BLACK);
+    healths.push_back(Health(0, 0, color_t{236, 64, 122}));
+    boosters.push_back(Booster(3, 3, color_t{255, 235, 59}));
     for(int i=0; i<200; ++i) {
         rocks.emplace_back(Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK));
     }
+    rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
+        int dx = ro.position.x - 100;
+        int dy = ro.position.y - 100;
+        return (dx * dx + dy * dy) <= 30 * 30;
+    }), rocks.end());
 
     for(int i=0; i<200; ++i) {
         barrels.emplace_back(Barrel((rand() % 2001) - 1000, (rand() % 2001) - 1000, color_t{150, 111, 51}, color_t{129, 212, 250}));
     }
+
+    barrels.erase(std::remove_if(barrels.begin(), barrels.end(), [](Barrel &ba) {
+        int dx = ba.position.x - 100;
+        int dy = ba.position.y - 100;
+        return (dx * dx + dy * dy) <= 30 * 30;
+    }), barrels.end());
 
     initVP = glm::ortho(-4*16.0f/9, 4*16.0f/9, -4.0f, 4.0f, 0.1f, 500.0f) * glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
@@ -426,13 +478,19 @@ int main(int argc, char **argv) {
             // 60 fps
             // OpenGL Draw commands
             draw();
+            --boosterTimeLeft;
             // Swap Frame Buffer in double buffering
             glfwSwapBuffers(window);
 
             tick_elements();
             tick_input(window);
 
-            sprintf(windowTitle, "SCORE-%d  HEALTH-%d", score, health);
+            if(boosterTimeLeft > 0) {
+                sprintf(windowTitle, "SCORE-%d  HEALTH-%d BOOST LEFT - %d", score, health, (boosterTimeLeft+59)/60);
+            }
+            else {
+                sprintf(windowTitle, "SCORE-%d  HEALTH-%d", score, health);
+            }
 
             if(health <= 0) {
                 printf("Your score was %d.\n", score);
