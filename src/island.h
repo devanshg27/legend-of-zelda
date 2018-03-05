@@ -6,7 +6,7 @@
 class Island {
 public:
     Island() {}
-    Island(float x, float y, color_t color, color_t color2);
+    Island(float x, float y, color_t color);
     glm::vec3 position;
     float rotation;
     void draw(glm::mat4 VP);

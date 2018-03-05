@@ -9,6 +9,7 @@
 #include "sea.h"
 #include "rock.h"
 #include "island.h"
+#include "barrel.h"
 #include "audio.h"
 #include "display.h"
 #include "aim.h"
@@ -33,6 +34,7 @@ int health, score;
 Island island1;
 Boat boat1;
 vector<Rock> rocks;
+vector<Barrel> barrels;
 Sea sea1;
 int maskArr[256];
 glm::mat4 initVP;
@@ -148,6 +150,10 @@ void draw() {
         z.draw(VP);
     }
 
+    for(auto&z: barrels) {
+        z.draw(VP);
+    }
+
     glUseProgram (textureProgramID);
     sea1.draw(VP);
     boat1.texturedDraw(VP);
@@ -248,10 +254,25 @@ void tick_elements() {
     ball1.tick();
     boat1.tick();
     sea1.tick();
+    for(auto&z: barrels) {
+        z.tick();
+    }
     int oldRocksSz = rocks.size();
     rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
         return detect_collision(ro.shape, boat1.shape);
     }), rocks.end());
+    for(auto it = barrels.begin(); it != barrels.end();) {
+        if(detect_collision(it->shape2, boat1.shape)) {
+            score += 10;
+            it = barrels.erase(it);
+        }
+        else if(detect_collision(it->shape, boat1.shape)) {
+            it = barrels.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
     health += (rocks.size() - oldRocksSz)*5;
 }
 
@@ -289,13 +310,17 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball1 = Ball(0, 0, COLOR_RED);
+    ball1 = Ball(0, 0, color_t{239, 108, 0});
     boat1 = Boat(-15, 0, color_t{62, 39, 35}, COLOR_RED, color_t{255, 87, 34});
     sea1 = Sea(0, 2, COLOR_BLUE);
-    island1 = Island(100, 100, color_t{255, 255, 141}, COLOR_RED);
+    island1 = Island(100, 100, color_t{255, 255, 141});
     aim1 = Aim(0, 0, COLOR_BLACK);
     for(int i=0; i<200; ++i) {
         rocks.emplace_back(Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK));
+    }
+
+    for(int i=0; i<200; ++i) {
+        barrels.emplace_back(Barrel((rand() % 2001) - 1000, (rand() % 2001) - 1000, color_t{150, 111, 51}, color_t{129, 212, 250}));
     }
 
     initVP = glm::ortho(-4*16.0f/9, 4*16.0f/9, -4.0f, 4.0f, 0.1f, 500.0f) * glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));

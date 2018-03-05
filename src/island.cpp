@@ -1,7 +1,7 @@
 #include "island.h"
 #include "main.h"
 
-Island::Island(float x, float y, color_t color, color_t color2) {
+Island::Island(float x, float y, color_t color) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
