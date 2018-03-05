@@ -2,16 +2,23 @@
 #include "main.h"
 #include "texture.h"
 
-Boat::Boat(float x, float y, color_t color, color_t baseColor) {
+Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColor) {
     speed = -0.025f;
     this->position = glm::vec3(x, y, 2*speed);
     this->rotation = 0;
+    this->windRatio = 0;
+    this->mastRatio = 0;
+    this->oldWindAngle = 0;
     this->velocity = 0;
     this->upVelocity = -1;
+    this->windAngle = 0;
+    this->oldMastScale = 1;
+    this->mastScale = 1;
     GLfloat vertex_buffer_data[9*2*10*11];
     GLfloat base_vertex_buffer_data[9*2*2*10];
     GLfloat sail_vertex_buffer_data[9*2*10*1];
     GLfloat mast_vertex_buffer_data[9*2*2*11];
+    GLfloat arrow_vertex_buffer_data[9*3];
     GLfloat g_uv_buffer_data[6*2*2*11];
     double bentSine[11];
     this->Texture = loadDDS("dragon.dds");
@@ -189,28 +196,67 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor) {
         sail_vertex_buffer_data[(18*i)+17] = mastHeight - 0.7*((i+1)/10.0*mastHeight);
 
         g_uv_buffer_data[(12*i)+0] = 2;
-        g_uv_buffer_data[(12*i)+1] = 2 * (1.0 - i/10.0);
+        g_uv_buffer_data[(12*i)+1] = 2 * (i/10.0);
 
         g_uv_buffer_data[(12*i)+2] = 0;
-        g_uv_buffer_data[(12*i)+3] = 2 * (1.0 - (i+1)/10.0);
+        g_uv_buffer_data[(12*i)+3] = 2 * ((i+1)/10.0);
 
         g_uv_buffer_data[(12*i)+4] = 2;
-        g_uv_buffer_data[(12*i)+5] = 2 * (1.0 - (i+1)/10.0);
+        g_uv_buffer_data[(12*i)+5] = 2 * ((i+1)/10.0);
 
         g_uv_buffer_data[(12*i)+6] = 2;
-        g_uv_buffer_data[(12*i)+7] = 2 * (1.0 - i/10.0);
+        g_uv_buffer_data[(12*i)+7] = 2 * (i/10.0);
 
         g_uv_buffer_data[(12*i)+8] = 0;
-        g_uv_buffer_data[(12*i)+9] = 2 * (1.0 - i/10.0);
+        g_uv_buffer_data[(12*i)+9] = 2 * (i/10.0);
 
         g_uv_buffer_data[(12*i)+10] = 0;
-        g_uv_buffer_data[(12*i)+11] = 2 * (1.0 - (i+1)/10.0);
+        g_uv_buffer_data[(12*i)+11] = 2 * ((i+1)/10.0);
     }
+
+    float arrowWidth = 0.25;
+
+    arrow_vertex_buffer_data[0] = 7;
+    arrow_vertex_buffer_data[1] = -2 * arrowWidth;
+    arrow_vertex_buffer_data[2] = 1;
+
+    arrow_vertex_buffer_data[3] = 6;
+    arrow_vertex_buffer_data[4] = 0;
+    arrow_vertex_buffer_data[5] = 1;
+
+    arrow_vertex_buffer_data[6] = 7;
+    arrow_vertex_buffer_data[7] = 2 * arrowWidth;
+    arrow_vertex_buffer_data[8] = 1;
+
+    arrow_vertex_buffer_data[9+0] = 7;
+    arrow_vertex_buffer_data[9+1] = -arrowWidth;
+    arrow_vertex_buffer_data[9+2] = 1;
+
+    arrow_vertex_buffer_data[9+3] = 8.5;
+    arrow_vertex_buffer_data[9+4] = arrowWidth;
+    arrow_vertex_buffer_data[9+5] = 1;
+
+    arrow_vertex_buffer_data[9+6] = 8.5;
+    arrow_vertex_buffer_data[9+7] = -arrowWidth;
+    arrow_vertex_buffer_data[9+8] = 1;
+
+    arrow_vertex_buffer_data[18+0] = 7;
+    arrow_vertex_buffer_data[18+1] = -arrowWidth;
+    arrow_vertex_buffer_data[18+2] = 1;
+
+    arrow_vertex_buffer_data[18+3] = 7;
+    arrow_vertex_buffer_data[18+4] = arrowWidth;
+    arrow_vertex_buffer_data[18+5] = 1;
+
+    arrow_vertex_buffer_data[18+6] = 8.5;
+    arrow_vertex_buffer_data[18+7] = arrowWidth;
+    arrow_vertex_buffer_data[18+8] = 1;
 
     this->object = create3DObject(GL_TRIANGLES, (sizeof(vertex_buffer_data)/(3*sizeof(vertex_buffer_data[0]))), vertex_buffer_data, color, GL_FILL);
     this->mastObject = create3DObject(GL_TRIANGLES, (sizeof(mast_vertex_buffer_data)/(3*sizeof(mast_vertex_buffer_data[0]))), mast_vertex_buffer_data, color, GL_FILL);
     this->baseObject = create3DObject(GL_TRIANGLES, (sizeof(base_vertex_buffer_data)/(3*sizeof(base_vertex_buffer_data[0]))), base_vertex_buffer_data, baseColor, GL_FILL);
     this->sailObject = createTextured3DObject(GL_TRIANGLES, (sizeof(sail_vertex_buffer_data)/(3*sizeof(sail_vertex_buffer_data[0]))), sail_vertex_buffer_data, g_uv_buffer_data, GL_FILL);
+    this->arrowObject = create3DObject(GL_TRIANGLES, (sizeof(arrow_vertex_buffer_data)/(3*sizeof(arrow_vertex_buffer_data[0]))), arrow_vertex_buffer_data, arrowColor, GL_FILL);
 }
 
 void Boat::draw(glm::mat4 VP) {
@@ -223,17 +269,30 @@ void Boat::draw(glm::mat4 VP) {
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->object);
-    draw3DObject(this->mastObject);
     draw3DObject(this->baseObject);
+    glm::mat4 arrowTranslate = glm::translate (glm::vec3(-7, 0, 0));
+    glm::mat4 arrowRotate    = glm::rotate((float) ((this->windAngle-this->rotation) * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    glm::mat4 arrowTranslateinv = glm::translate (glm::vec3(7, 0, 0));
+    Matrices.model *= (arrowTranslateinv * arrowRotate * arrowTranslate);
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->arrowObject);
+    glm::mat4 scale = glm::scale(glm::vec3(((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio))), ((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio))), ((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio)))));
+    Matrices.model = glm::mat4(1.0f);
+    Matrices.model *= (translate * rotate * scale);
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->mastObject);
 }
 
 void Boat::texturedDraw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
-    glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    glm::mat4 rotate    = glm::rotate((float) (((this->windAngle * this->windRatio) + (this->oldWindAngle * (1.0 - this->windRatio))) * M_PI / 180.0f), glm::vec3(0, 0, 1));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
-    Matrices.model *= (translate * rotate);
+    glm::mat4 scale = glm::scale(glm::vec3(((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio))), ((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio))), ((this->mastScale * this->mastRatio) + (this->oldMastScale * (1.0 - this->mastRatio)))));
+    Matrices.model *= (translate * rotate * scale);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(textureMatrixID, 1, GL_FALSE, &MVP[0][0]);
     glActiveTexture(GL_TEXTURE0);
@@ -248,8 +307,14 @@ void Boat::set_position(float x, float y) {
 }
 
 void Boat::tick() {
-    this->position.x -= velocity * cos(this->rotation * PI / 180.0f);
-    this->position.y -= velocity * sin(this->rotation * PI / 180.0f);
+    if(cos((this->windAngle - this->rotation)*PI/180.0) > 0.3) {
+        this->position.x -= (1 + cos((this->windAngle - this->rotation)*PI/180.0)) * velocity * cos(this->rotation * PI / 180.0f);
+        this->position.y -= (1 + cos((this->windAngle - this->rotation)*PI/180.0)) * velocity * sin(this->rotation * PI / 180.0f);
+    }
+    else {
+        this->position.x -= velocity * cos(this->rotation * PI / 180.0f);
+        this->position.y -= velocity * sin(this->rotation * PI / 180.0f);
+    }
     if(this->velocity > 0) {
         this->velocity = std::max(0.0, this->velocity - 0.004);
     }
@@ -265,5 +330,7 @@ void Boat::tick() {
         if(this->position.z < -0.5 or this->position.z >= -0.03) speed = -speed;
         this->position.z -= speed;
     }
+    this->windRatio = std::min(1.0f, this->windRatio + 0.01f);
+    this->mastRatio = std::min(1.0f, this->mastRatio + 0.04f);
 }
 

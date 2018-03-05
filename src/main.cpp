@@ -134,7 +134,7 @@ void tick_input(GLFWwindow *window) {
     int up  = glfwGetKey(window, GLFW_KEY_UP);
     int down = glfwGetKey(window, GLFW_KEY_DOWN);
     if (up) {
-        boat1.velocity = 0.35;
+        boat1.velocity = 0.25;
     }
     if (down) {
         boat1.velocity = -0.15;
@@ -200,7 +200,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     // Create the models
 
     ball1 = Ball(0, 0, COLOR_RED);
-    boat1 = Boat(-15, 0, COLOR_BLACK, COLOR_RED);
+    boat1 = Boat(-15, 0, COLOR_BLACK, COLOR_RED, color_t{255, 87, 34});
     sea1 = Sea(0, 2, COLOR_BLUE);
 
     // Create and compile our GLSL program from the shaders
@@ -270,6 +270,7 @@ int main(int argc, char **argv) {
     srand(time(0));
     int width  = 1600;
     int height = 900;
+    int cnt = 0;
 
     startAudioPlayer();
 
@@ -290,6 +291,26 @@ int main(int argc, char **argv) {
 
             tick_elements();
             tick_input(window);
+            ++cnt;
+            if((cnt & 511) == 0) {
+                boat1.oldWindAngle = boat1.windAngle;
+                boat1.windRatio = 0;
+                boat1.windAngle = rand()%360;
+            }
+            if(cos((boat1.windAngle - boat1.rotation)*PI/180.0) > 0.3) {
+                if(boat1.mastScale != 1) {
+                    boat1.mastRatio = 0;
+                    boat1.oldMastScale = boat1.mastScale;
+                    boat1.mastScale = 1;
+                }
+            }
+            else {
+                if(boat1.mastScale != 0) {
+                    boat1.mastRatio = 0;
+                    boat1.oldMastScale = boat1.mastScale;
+                    boat1.mastScale = 0;
+                }
+            }
         }
 
         // Poll for Keyboard and mouse events
