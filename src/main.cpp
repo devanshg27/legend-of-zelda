@@ -7,6 +7,7 @@
 #include "ball.h"
 #include "boat.h"
 #include "sea.h"
+#include "chest.h"
 #include "rock.h"
 #include "island.h"
 #include "barrel.h"
@@ -35,6 +36,7 @@ Ball ball1;
 Aim aim1;
 int health, score, numMonsters = 10, nxtBoss = 2;
 Island island1;
+Chest chest1;
 Boat boat1;
 vector<Rock> rocks;
 vector<Ball> enemyBalls;
@@ -150,6 +152,7 @@ void draw() {
     }
     boat1.draw(VP);
     island1.draw(VP);
+    chest1.draw(VP);
     for(auto&z: displayList) {
         z.draw(initVP);
     }
@@ -300,7 +303,7 @@ void tick_elements() {
             z.position.y += 0.12*temp.y;
             z.shape.position = z.position;
         }
-        if((cnt & 511) == 0) {
+        if((cnt & 255) == 0) {
             enemyBalls[idx].position = z.position;
             enemyBalls[idx].velocity.x = temp.x;
             enemyBalls[idx].velocity.y = temp.y;
@@ -423,6 +426,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     boat1 = Boat(-15, 0, color_t{62, 39, 35}, COLOR_RED, color_t{255, 87, 34});
     sea1 = Sea(0, 2, COLOR_BLUE);
     island1 = Island(100, 100, color_t{255, 255, 141});
+    chest1 = Chest(100, 100, color_t{109, 32, 8});
     aim1 = Aim(0, 0, COLOR_BLACK);
     // healths.push_back(Health(0, 0, color_t{236, 64, 122}));
     // boosters.push_back(Booster(3, 3, color_t{255, 235, 59}));
@@ -430,7 +434,12 @@ void initGL(GLFWwindow *window, int width, int height) {
         monsters.emplace_back(Monster((rand() % 501) - 250, (rand() % 501) - 250, color_t{236, 64, 122}, false));
         enemyBalls.emplace_back(Ball(0, 0, color_t{239, 108, 0}, 0.005));
     }
-    for(int i=0; i<150; ++i) {
+    monsters.erase(std::remove_if(monsters.begin(), monsters.end(), [](Monster &mo) {
+        int dx = mo.position.x - 100;
+        int dy = mo.position.y - 100;
+        return (dx * dx + dy * dy) <= 30 * 30;
+    }), monsters.end());
+    for(int i=0; i<100; ++i) {
         rocks.emplace_back(Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK));
     }
     rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
@@ -439,7 +448,7 @@ void initGL(GLFWwindow *window, int width, int height) {
         return (dx * dx + dy * dy) <= 30 * 30;
     }), rocks.end());
 
-    for(int i=0; i<150; ++i) {
+    for(int i=0; i<100; ++i) {
         barrels.emplace_back(Barrel((rand() % 2001) - 1000, (rand() % 2001) - 1000, color_t{150, 111, 51}, color_t{129, 212, 250}));
     }
 
