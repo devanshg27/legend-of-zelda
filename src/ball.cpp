@@ -43,6 +43,7 @@ Ball::Ball(float x, float y, color_t color) {
 
     }
 
+    this->shape = sphereBounding(this->position.x, this->position.y, this->position.z, radius);
     this->object = create3DObject(GL_TRIANGLES, (sizeof(vertex_buffer_data)/(3*sizeof(vertex_buffer_data[0]))), vertex_buffer_data, color, GL_FILL);
 }
 
@@ -60,5 +61,6 @@ void Ball::draw(glm::mat4 VP) {
 void Ball::tick() {
     this->position += this->velocity;
     this->velocity.z -= 0.01;
+    this->shape.position = this->position;
 }
 

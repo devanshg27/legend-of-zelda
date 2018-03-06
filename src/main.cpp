@@ -283,6 +283,11 @@ void tick_elements() {
     for(auto&z: boosters) {
         z.tick();
     }
+    for(auto&z: monsters) {
+        glm::vec2 temp = (glm::vec2(boat1.position.x - z.position.x, boat1.position.y-z.position.y));
+        temp = temp / length(temp);
+        z.rotation = glm::orientedAngle(temp,glm::vec2(1, 0)) * -180 / PI;
+    }
     int oldRocksSz = rocks.size();
     rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
         return detect_collision(ro.shape, boat1.shape);
@@ -311,8 +316,12 @@ void tick_elements() {
         }
     }
     for(auto it = monsters.begin(); it != monsters.end();) {
-        if(detect_collision(it->shape, boat1.shape)) {
-            health -= 20;
+        if(detect_collision(it->shape, ball1.shape)) {
+            score += 50;
+            it = monsters.erase(it);
+        }
+        else if(detect_collision(it->shape, boat1.shape)) {
+            health -= 40;
             it = monsters.erase(it);
         }
         else {
