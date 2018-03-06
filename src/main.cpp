@@ -33,10 +33,11 @@ GLuint TextureID;
 char windowTitle[256];
 Ball ball1;
 Aim aim1;
-int health, score;
+int health, score, numMonsters = 10, nxtBoss = 2;
 Island island1;
 Boat boat1;
 vector<Rock> rocks;
+vector<Ball> enemyBalls;
 vector<Barrel> barrels;
 vector<Health> healths;
 vector<Booster> boosters;
@@ -144,6 +145,9 @@ void draw() {
 
     // Scene render
     ball1.draw(VP);
+    for(auto&z: enemyBalls) {
+        z.draw(VP);
+    }
     boat1.draw(VP);
     island1.draw(VP);
     for(auto&z: displayList) {
@@ -272,6 +276,9 @@ void tick_input(GLFWwindow *window) {
 
 void tick_elements() {
     ball1.tick();
+    for(auto&z: enemyBalls) {
+        z.tick();
+    }
     boat1.tick();
     sea1.tick();
     for(auto&z: barrels) {
@@ -283,10 +290,23 @@ void tick_elements() {
     for(auto&z: boosters) {
         z.tick();
     }
+    int idx = 0;
     for(auto&z: monsters) {
         glm::vec2 temp = (glm::vec2(boat1.position.x - z.position.x, boat1.position.y-z.position.y));
         temp = temp / length(temp);
         z.rotation = glm::orientedAngle(temp,glm::vec2(1, 0)) * -180 / PI;
+        if(z.isBoss) {
+            z.position.x += 0.12*temp.x;
+            z.position.y += 0.12*temp.y;
+            z.shape.position = z.position;
+        }
+        if((cnt & 511) == 0) {
+            enemyBalls[idx].position = z.position;
+            enemyBalls[idx].velocity.x = temp.x;
+            enemyBalls[idx].velocity.y = temp.y;
+            enemyBalls[idx].velocity.z = 0.1;
+        }
+        ++idx;
     }
     int oldRocksSz = rocks.size();
     rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
@@ -304,6 +324,12 @@ void tick_elements() {
             ++it;
         }
     }
+    for(auto&z: enemyBalls) {
+        if(detect_collision(z.shape, boat1.sphereShape)) {
+            health -= 10;
+            z.position.z -= 100;
+        }
+    }
     health -= (oldRocksSz - rocks.size())*5;
     for(auto it = healths.begin(); it != healths.end();) {
         if(detect_collision(it->shape, boat1.shape)) {
@@ -317,17 +343,36 @@ void tick_elements() {
     }
     for(auto it = monsters.begin(); it != monsters.end();) {
         if(detect_collision(it->shape, ball1.shape)) {
-            score += 50;
-            it = monsters.erase(it);
-            ball1.position.z -= 10;
+            if(it->isBoss > 1) {
+                it->isBoss -= 1;
+                ball1.position.z -= 10;
+                ++it;
+            }
+            else if(it->isBoss == 1) {
+                score += 200;
+                boosters.push_back(Booster(it->position.x, it->position.y, color_t{255, 235, 59}));
+                it = monsters.erase(it);
+                ball1.position.z -= 10;
+            }
+            else {
+                score += 50;
+                healths.push_back(Health(it->position.x, it->position.y, color_t{236, 64, 122}));
+                it = monsters.erase(it);
+                ball1.position.z -= 10;
+            }
         }
         else if(detect_collision(it->shape, boat1.shape)) {
-            health -= 40;
+            if(it->isBoss) health = 0;
+            else health -= 40;
             it = monsters.erase(it);
         }
         else {
             ++it;
         }
+    }
+    if(monsters.size() == numMonsters - nxtBoss){
+        monsters.push_back(Monster(10, 10, color_t{236, 64, 122}, true));
+        nxtBoss += 2;
     }
     for(auto it = boosters.begin(); it != boosters.end();) {
         if(detect_collision(it->shape, boat1.shape)) {
@@ -379,9 +424,12 @@ void initGL(GLFWwindow *window, int width, int height) {
     sea1 = Sea(0, 2, COLOR_BLUE);
     island1 = Island(100, 100, color_t{255, 255, 141});
     aim1 = Aim(0, 0, COLOR_BLACK);
-    healths.push_back(Health(0, 0, color_t{236, 64, 122}));
-    monsters.push_back(Monster(4, 0, color_t{236, 64, 122}, false));
-    boosters.push_back(Booster(3, 3, color_t{255, 235, 59}));
+    // healths.push_back(Health(0, 0, color_t{236, 64, 122}));
+    // boosters.push_back(Booster(3, 3, color_t{255, 235, 59}));
+    for(int i=0; i<numMonsters; ++i) {
+        monsters.emplace_back(Monster((rand() % 501) - 250, (rand() % 501) - 250, color_t{236, 64, 122}, false));
+        enemyBalls.emplace_back(Ball(0, 0, color_t{239, 108, 0}, 0.005));
+    }
     for(int i=0; i<150; ++i) {
         rocks.emplace_back(Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK));
     }
@@ -502,6 +550,7 @@ int main(int argc, char **argv) {
 
         if (t60.processTick()) {
             // 60 fps
+            ++cnt;
             // OpenGL Draw commands
             draw();
             --boosterTimeLeft;
@@ -531,7 +580,6 @@ int main(int argc, char **argv) {
                 displayList[i].mask = maskArr[windowTitle[i]];
             }
 
-            ++cnt;
             if((cnt & 511) == 0) {
                 boat1.oldWindAngle = boat1.windAngle;
                 boat1.windRatio = 0;

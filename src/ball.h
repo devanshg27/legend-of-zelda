@@ -8,10 +8,11 @@
 class Ball {
 public:
     Ball() {}
-    Ball(float x, float y, color_t color);
+    Ball(float x, float y, color_t color, float acc = 0.01);
     glm::vec3 position, velocity;
     sphereBounding shape;
     void draw(glm::mat4 VP);
+    float acc;
     void tick();
 private:
     VAO *object;

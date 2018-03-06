@@ -316,6 +316,7 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColo
     for(int i=0; i<(sizeof(base_vertex_buffer_data)/sizeof(base_vertex_buffer_data[0])); i+=3) {
         this->shape.origPoints.push_back(glm::vec3(base_vertex_buffer_data[i], base_vertex_buffer_data[i+1], base_vertex_buffer_data[i+2]));
     }
+    this->sphereShape = sphereBounding(this->position.x, this->position.y, this->position.z, 4.5f);
 }
 
 void Boat::draw(glm::mat4 VP) {
@@ -405,5 +406,6 @@ void Boat::tick() {
         temp += this->position;
         this->shape.points.emplace_back(temp);
     }
+    this->sphereShape.position = this->position;
 }
 

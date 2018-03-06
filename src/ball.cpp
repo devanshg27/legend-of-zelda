@@ -1,9 +1,9 @@
 #include "ball.h"
 #include "main.h"
 
-Ball::Ball(float x, float y, color_t color) {
+Ball::Ball(float x, float y, color_t color, float acc) {
     this->position = glm::vec3(x, y, -100);
-
+    this->acc = acc;
     GLfloat vertex_buffer_data[9*2*10*10];
 
     float radius = 0.5;
@@ -60,7 +60,7 @@ void Ball::draw(glm::mat4 VP) {
 
 void Ball::tick() {
     this->position += this->velocity;
-    this->velocity.z -= 0.01;
+    this->velocity.z -= this->acc;
     this->shape.position = this->position;
 }
 

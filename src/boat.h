@@ -23,6 +23,7 @@ public:
     void tick();
     double speed;
     boatBounding shape;
+    sphereBounding sphereShape;
 private:
     VAO *object;
     VAO *mastObject;
