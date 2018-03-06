@@ -373,6 +373,14 @@ void tick_elements() {
             ++it;
         }
     }
+    if(detect_collision(chest1.shape, ball1.shape)) {
+        chest1.broken = 1;
+        ball1.position.z -= 10;
+    }
+    if(detect_collision(chest1.shape, boat1.shape) and chest1.broken == 1) {
+        chest1.broken = 2;
+        score += 1000;
+    }
     if(monsters.size() == numMonsters - nxtBoss){
         monsters.push_back(Monster(10, 10, color_t{236, 64, 122}, true));
         nxtBoss += 2;
@@ -439,7 +447,7 @@ void initGL(GLFWwindow *window, int width, int height) {
         int dy = mo.position.y - 100;
         return (dx * dx + dy * dy) <= 30 * 30;
     }), monsters.end());
-    for(int i=0; i<100; ++i) {
+    for(int i=0; i<70; ++i) {
         rocks.emplace_back(Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK));
     }
     rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
@@ -448,7 +456,7 @@ void initGL(GLFWwindow *window, int width, int height) {
         return (dx * dx + dy * dy) <= 30 * 30;
     }), rocks.end());
 
-    for(int i=0; i<100; ++i) {
+    for(int i=0; i<70; ++i) {
         barrels.emplace_back(Barrel((rand() % 2001) - 1000, (rand() % 2001) - 1000, color_t{150, 111, 51}, color_t{129, 212, 250}));
     }
 
@@ -470,7 +478,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     textureMatrixID = glGetUniformLocation(textureProgramID, "MVP");
     TextureID  = glGetUniformLocation(textureProgramID, "myTextureSampler");
 
-    for(int i=0; i<100; ++i) {
+    for(int i=0; i<70; ++i) {
         displayList.push_back(Display((-4 * 16.0/9) + 0.1 + i*0.2, 3.8, COLOR_BLACK, maskArr[' ']));
     }
     reshapeWindow (window, width, height);
