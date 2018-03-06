@@ -1,9 +1,10 @@
 #include "monster.h"
 #include "main.h"
 
-Monster::Monster(float x, float y, color_t color) {
-    this->position = glm::vec3(x, y, 2);
+Monster::Monster(float x, float y, color_t color, bool isBoss) {
+    this->position = glm::vec3(x, y, 2 + 2*isBoss);
     this->rotation = 0;
+    if(isBoss) this->isBoss = 4;
     GLfloat vertex_buffer_data[9*2*10*10];
     GLfloat mouth_vertex_buffer_data[9*2*10*10];
     GLfloat thorn_vertex_buffer_data[9*2*2*10];
@@ -98,7 +99,7 @@ Monster::Monster(float x, float y, color_t color) {
             double prevAngUpper = ((j-5)*(PI)/20.0) * ((12 - i + 1) / 12.0);
             double angUpper = ((j-4)*(PI)/20.0) * ((12 - i + 1) / 12.0);
 
-            mouth_vertex_buffer_data[(18*10*i)+(18*j)+0] = radius * sin(prevyAng) *cos(prevAng);
+            mouth_vertex_buffer_data[(18*10*i)+(18*j)+0] = radius * sin(prevyAng) *cos(prevAngUpper);
             mouth_vertex_buffer_data[(18*10*i)+(18*j)+1] = radius * sin(prevyAng) *sin(prevAngUpper);
             mouth_vertex_buffer_data[(18*10*i)+(18*j)+2] = radius * cos(prevyAng);
 
@@ -110,11 +111,11 @@ Monster::Monster(float x, float y, color_t color) {
             mouth_vertex_buffer_data[(18*10*i)+(18*j)+7] = radius * sin(yAng) *sin(prevAng);
             mouth_vertex_buffer_data[(18*10*i)+(18*j)+8] = radius * cos(yAng);
 
-            mouth_vertex_buffer_data[(18*10*i)+(18*j)+9] = radius * sin(prevyAng) *cos(prevAng);
+            mouth_vertex_buffer_data[(18*10*i)+(18*j)+9] = radius * sin(prevyAng) *cos(prevAngUpper);
             mouth_vertex_buffer_data[(18*10*i)+(18*j)+10] =radius * sin(prevyAng) *sin(prevAngUpper);
             mouth_vertex_buffer_data[(18*10*i)+(18*j)+11] = radius * cos(prevyAng);
 
-            mouth_vertex_buffer_data[(18*10*i)+(18*j)+12] = radius * sin(prevyAng) *cos(ang);
+            mouth_vertex_buffer_data[(18*10*i)+(18*j)+12] = radius * sin(prevyAng) *cos(angUpper);
             mouth_vertex_buffer_data[(18*10*i)+(18*j)+13] = radius * sin(prevyAng) *sin(angUpper);
             mouth_vertex_buffer_data[(18*10*i)+(18*j)+14] = radius * cos(prevyAng);
 
@@ -232,21 +233,23 @@ Monster::Monster(float x, float y, color_t color) {
         cannon_vertex_buffer_data[(18*10)+(18*i)+17] = 1 + 0.3*cos(prevAng);
     }
 
-    this->object = create3DObject(GL_TRIANGLES, (sizeof(vertex_buffer_data)/(3*sizeof(vertex_buffer_data[0]))), vertex_buffer_data, color_t{74, 20, 140}, GL_FILL);
+    if(isBoss) this->object = create3DObject(GL_TRIANGLES, (sizeof(vertex_buffer_data)/(3*sizeof(vertex_buffer_data[0]))), vertex_buffer_data, color_t{51, 105, 30}, GL_FILL);
+    else this->object = create3DObject(GL_TRIANGLES, (sizeof(vertex_buffer_data)/(3*sizeof(vertex_buffer_data[0]))), vertex_buffer_data, color_t{74, 20, 140}, GL_FILL);
     this->thornObject = create3DObject(GL_TRIANGLES, (sizeof(thorn_vertex_buffer_data)/(3*sizeof(thorn_vertex_buffer_data[0]))), thorn_vertex_buffer_data, color_t{176, 190, 197}, GL_FILL);
     this->legObject = create3DObject(GL_TRIANGLES, (sizeof(leg_vertex_buffer_data)/(3*sizeof(leg_vertex_buffer_data[0]))), leg_vertex_buffer_data, color_t{233, 30, 99}, GL_FILL);
     this->eyeObject = create3DObject(GL_TRIANGLES, (sizeof(cannon_vertex_buffer_data)/(3*sizeof(cannon_vertex_buffer_data[0]))), cannon_vertex_buffer_data, color_t{255, 255, 255}, GL_FILL);
     this->mouthObject = create3DObject(GL_TRIANGLES, (sizeof(mouth_vertex_buffer_data)/(3*sizeof(mouth_vertex_buffer_data[0]))), mouth_vertex_buffer_data, color_t{240, 98, 146}, GL_FILL);
-    this->shape = sphereBounding(this->position.x, this->position.y, this->position.z, 3.0f);
+    this->shape = sphereBounding(this->position.x, this->position.y, this->position.z, (1+1.5*(isBoss > 0)) * 2.0f);
 }
 
 void Monster::draw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
     glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    glm::mat4 scale = glm::scale(glm::vec3(1+1.5*(isBoss > 0), 1+1.5*(isBoss > 0), 1+1.5*(isBoss > 0)));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     // rotate          = rotate * glm::translate(glm::vec3(0, 0.6, 0));
-    Matrices.model *= (translate * rotate);
+    Matrices.model *= (translate * rotate * scale);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->thornObject);

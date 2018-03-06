@@ -179,7 +179,7 @@ Barrel::Barrel(float x, float y, color_t color, color_t color2) {
     this->diamondObject2 = create3DObject(GL_TRIANGLES, (sizeof(diamond2_vertex_buffer_data)/(3*sizeof(diamond2_vertex_buffer_data[0]))), diamond2_vertex_buffer_data, color2, GL_FILL);
 
     this->shape = sphereBounding(this->position.x, this->position.y, this->position.z, 1.2f);
-    this->shape2 = sphereBounding(this->position.x, this->position.y, this->position.z + ((4.0+6.75)/2.0), ((6.75-4)/2.0));
+    this->shape2 = sphereBounding(this->position.x, this->position.y, this->position.z + ((4.0+6.75)/2.0), ((6.75-4)/1.8));
 }
 
 void Barrel::draw(glm::mat4 VP) {

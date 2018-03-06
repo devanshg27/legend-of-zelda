@@ -319,6 +319,7 @@ void tick_elements() {
         if(detect_collision(it->shape, ball1.shape)) {
             score += 50;
             it = monsters.erase(it);
+            ball1.position.z -= 10;
         }
         else if(detect_collision(it->shape, boat1.shape)) {
             health -= 40;
@@ -379,7 +380,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     island1 = Island(100, 100, color_t{255, 255, 141});
     aim1 = Aim(0, 0, COLOR_BLACK);
     healths.push_back(Health(0, 0, color_t{236, 64, 122}));
-    monsters.push_back(Monster(4, 0, color_t{236, 64, 122}));
+    monsters.push_back(Monster(4, 0, color_t{236, 64, 122}, false));
     boosters.push_back(Booster(3, 3, color_t{255, 235, 59}));
     for(int i=0; i<150; ++i) {
         rocks.emplace_back(Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK));

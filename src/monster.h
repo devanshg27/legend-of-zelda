@@ -8,8 +8,9 @@
 class Monster {
 public:
     Monster() {}
-    Monster(float x, float y, color_t color);
+    Monster(float x, float y, color_t color, bool isBoss = false);
     glm::vec3 position;
+    int isBoss;
     float rotation;
     sphereBounding shape;
     void draw(glm::mat4 VP);
