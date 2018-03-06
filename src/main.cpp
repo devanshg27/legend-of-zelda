@@ -11,6 +11,7 @@
 #include "island.h"
 #include "barrel.h"
 #include "health.h"
+#include "monster.h"
 #include "booster.h"
 #include "audio.h"
 #include "display.h"
@@ -39,6 +40,7 @@ vector<Rock> rocks;
 vector<Barrel> barrels;
 vector<Health> healths;
 vector<Booster> boosters;
+vector<Monster> monsters;
 Sea sea1;
 int maskArr[256];
 glm::mat4 initVP;
@@ -160,6 +162,10 @@ void draw() {
     }
 
     for(auto&z: healths) {
+        z.draw(VP);
+    }
+
+    for(auto&z: monsters) {
         z.draw(VP);
     }
 
@@ -304,6 +310,15 @@ void tick_elements() {
             ++it;
         }
     }
+    for(auto it = monsters.begin(); it != monsters.end();) {
+        if(detect_collision(it->shape, boat1.shape)) {
+            health -= 20;
+            it = monsters.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
     for(auto it = boosters.begin(); it != boosters.end();) {
         if(detect_collision(it->shape, boat1.shape)) {
             boosterTimeLeft = 60 * 60;
@@ -355,8 +370,9 @@ void initGL(GLFWwindow *window, int width, int height) {
     island1 = Island(100, 100, color_t{255, 255, 141});
     aim1 = Aim(0, 0, COLOR_BLACK);
     healths.push_back(Health(0, 0, color_t{236, 64, 122}));
+    monsters.push_back(Monster(4, 0, color_t{236, 64, 122}));
     boosters.push_back(Booster(3, 3, color_t{255, 235, 59}));
-    for(int i=0; i<200; ++i) {
+    for(int i=0; i<150; ++i) {
         rocks.emplace_back(Rock((rand() % 2001) - 1000, (rand() % 2001) - 1000, COLOR_BLACK));
     }
     rocks.erase(std::remove_if(rocks.begin(), rocks.end(), [](Rock &ro) {
@@ -365,7 +381,7 @@ void initGL(GLFWwindow *window, int width, int height) {
         return (dx * dx + dy * dy) <= 30 * 30;
     }), rocks.end());
 
-    for(int i=0; i<200; ++i) {
+    for(int i=0; i<150; ++i) {
         barrels.emplace_back(Barrel((rand() % 2001) - 1000, (rand() % 2001) - 1000, color_t{150, 111, 51}, color_t{129, 212, 250}));
     }
 
