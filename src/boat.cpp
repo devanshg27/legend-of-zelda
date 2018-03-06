@@ -317,6 +317,171 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColo
         this->shape.origPoints.push_back(glm::vec3(base_vertex_buffer_data[i], base_vertex_buffer_data[i+1], base_vertex_buffer_data[i+2]));
     }
     this->sphereShape = sphereBounding(this->position.x, this->position.y, this->position.z, 4.5f);
+    this->humanShape = sphereBounding(this->position.x, this->position.y, this->position.z + 2.0f, 1.0f);
+
+    float length = 0.4f, breadth = 0.6f, depth = 0.6f, bottomHeight = 4;
+    static GLfloat face_vertex_buffer_data[] = {
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight
+    };
+
+    length = 0.55f, breadth = 0.8f, depth = 0.8f, bottomHeight = 2.7;
+    static GLfloat shirt_vertex_buffer_data[] = {
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight
+    };
+    length = 0.25f, breadth = 0.25f, depth = 0.8f, bottomHeight = 1.9;
+    static GLfloat hand_vertex_buffer_data[] = {
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight
+    };
+
+    length = 0.25f, breadth = 0.25f, depth = 0.6f, bottomHeight = 2.8;
+    static GLfloat foot_vertex_buffer_data[] = {
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f, -breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth,-depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f,  breadth, depth + bottomHeight,
+        -length + 2.5f,  breadth, depth + bottomHeight,
+        length + 2.5f, -breadth, depth + bottomHeight
+    };
+
+    this->faceObject = create3DObject(GL_TRIANGLES, 12*3, face_vertex_buffer_data, color_t{255,205,148}, GL_FILL);
+    this->shirtObject = create3DObject(GL_TRIANGLES, 12*3, shirt_vertex_buffer_data, color_t{255, 53, 53}, GL_FILL);
+    this->handObject = create3DObject(GL_TRIANGLES, 12*3, hand_vertex_buffer_data, color_t{255,205,148}, GL_FILL);
+    this->footObject = create3DObject(GL_TRIANGLES, 12*3, foot_vertex_buffer_data, color_t{255,205,148}, GL_FILL);
 }
 
 void Boat::draw(glm::mat4 VP) {
@@ -349,6 +514,38 @@ void Boat::draw(glm::mat4 VP) {
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->cannonObject);
+    draw3DObject(this->faceObject);
+    draw3DObject(this->shirtObject);
+
+    Matrices.model = glm::mat4(1.0f);
+    translate = glm::translate (this->position);    // glTranslatef
+    rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(0, -0.5, 0)));
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->handObject);
+    Matrices.model = glm::mat4(1.0f);
+    translate = glm::translate (this->position);    // glTranslatef
+    rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(0, 0.5, 0)));
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->handObject);
+
+    Matrices.model = glm::mat4(1.0f);
+    translate = glm::translate (this->position);    // glTranslatef
+    rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(0, -1, 0)));
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->footObject);
+    Matrices.model = glm::mat4(1.0f);
+    translate = glm::translate (this->position);    // glTranslatef
+    rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(0, 1, 0)));
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->footObject);
 }
 
 void Boat::texturedDraw(glm::mat4 VP) {
@@ -366,6 +563,49 @@ void Boat::texturedDraw(glm::mat4 VP) {
     // Set our "myTextureSampler" sampler to use Texture Unit 0
     glUniform1i(TextureID, 0);
     draw3DObject(this->sailObject, 1);
+}
+
+void Boat::islandDraw(glm::mat4 VP) {
+    Matrices.model = glm::mat4(1.0f);
+    glm::mat4 translate = glm::translate (this->position);    // glTranslatef
+    glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
+    // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, 0, 0)));
+    glm::mat4 MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->faceObject);
+    draw3DObject(this->shirtObject);
+
+    Matrices.model = glm::mat4(1.0f);
+    translate = glm::translate (this->position);    // glTranslatef
+    rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, -0.5, 0)));
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->handObject);
+    Matrices.model = glm::mat4(1.0f);
+    translate = glm::translate (this->position);    // glTranslatef
+    rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, 0.5, 0)));
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->handObject);
+
+    Matrices.model = glm::mat4(1.0f);
+    translate = glm::translate (this->position);    // glTranslatef
+    rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, -1, 0)));
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->footObject);
+    Matrices.model = glm::mat4(1.0f);
+    translate = glm::translate (this->position);    // glTranslatef
+    rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, 1, 0)));
+    MVP = VP * Matrices.model;
+    glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    draw3DObject(this->footObject);
 }
 
 void Boat::set_position(float x, float y) {
@@ -407,5 +647,35 @@ void Boat::tick() {
         this->shape.points.emplace_back(temp);
     }
     this->sphereShape.position = this->position;
+    this->humanShape.position = this->position;
 }
 
+void Boat::islandTick(sphereBounding shape2, int broken) {
+    auto oldPosition = this->position;
+    this->position.x -= velocity * cos(this->rotation * PI / 180.0f);
+    this->position.y -= velocity * sin(this->rotation * PI / 180.0f);
+    if(broken == 0 and 100-2 <= this->position.x and this->position.x <= 100+2 and 100-4 <= this->position.y and this->position.y <= 100+4) {
+        this->position = oldPosition;
+    }
+    if(this->velocity > 0) {
+        this->velocity = std::max(0.0, this->velocity - 0.004);
+    }
+    else if(this->velocity < 0) {
+        this->velocity = std::min(0.0, this->velocity + 0.004);
+    }
+    if(this->upVelocity >= 0 or this->position.z > 0) {
+        this->position.z += this->upVelocity;
+        this->upVelocity -= 0.02;
+        this->position.z = std::max(this->position.z, -0.48f);
+    }
+
+    this->shape.points.clear();
+    for(auto&z: this->shape.origPoints) {
+        glm::vec3 temp = z;
+        temp = glm::rotate(temp, (this->rotation * PI / 180.0f), glm::vec3(0, 0, 1));
+        temp += this->position;
+        this->shape.points.emplace_back(temp);
+    }
+    this->sphereShape.position = this->position;
+    this->humanShape.position = this->position;
+}

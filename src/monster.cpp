@@ -5,6 +5,7 @@ Monster::Monster(float x, float y, color_t color, bool isBoss) {
     this->position = glm::vec3(x, y, 2 + 2*isBoss);
     this->rotation = 0;
     if(isBoss) this->isBoss = 4;
+    else this->isBoss = 0;
     GLfloat vertex_buffer_data[9*2*10*10];
     GLfloat mouth_vertex_buffer_data[9*2*10*10];
     GLfloat thorn_vertex_buffer_data[9*2*2*10];

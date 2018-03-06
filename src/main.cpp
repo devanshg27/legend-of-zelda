@@ -34,6 +34,7 @@ GLuint TextureID;
 char windowTitle[256];
 Ball ball1;
 Aim aim1;
+bool onIsland = false;
 int health, score, numMonsters = 10, nxtBoss = 2;
 Island island1;
 Chest chest1;
@@ -150,7 +151,8 @@ void draw() {
     for(auto&z: enemyBalls) {
         z.draw(VP);
     }
-    boat1.draw(VP);
+    if(onIsland) boat1.islandDraw(VP);
+    else boat1.draw(VP);
     island1.draw(VP);
     chest1.draw(VP);
     for(auto&z: displayList) {
@@ -182,7 +184,7 @@ void draw() {
 
     glUseProgram (textureProgramID);
     sea1.draw(VP);
-    boat1.texturedDraw(VP);
+    if(!onIsland) boat1.texturedDraw(VP);
 }
 
 void startAudioPlayer() {
@@ -201,11 +203,11 @@ void tick_input(GLFWwindow *window) {
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int up  = glfwGetKey(window, GLFW_KEY_UP);
     int down = glfwGetKey(window, GLFW_KEY_DOWN);
-    if (up) {
+    if(up) {
         boat1.velocity = 0.25;
         if(boosterTimeLeft>0) boat1.velocity = 0.4;
     }
-    if (down) {
+    if(down) {
         boat1.velocity = -0.15;
     }
     if(left) {
@@ -278,11 +280,15 @@ void tick_input(GLFWwindow *window) {
 }
 
 void tick_elements() {
+    int dx = boat1.position.x - 100;
+    int dy = boat1.position.y - 100;
+    onIsland = (dx * dx + dy * dy) <= 30.5 * 30.5;
     ball1.tick();
     for(auto&z: enemyBalls) {
         z.tick();
     }
-    boat1.tick();
+    if(!onIsland) boat1.tick();
+    else boat1.islandTick(chest1.shape, chest1.broken);
     sea1.tick();
     for(auto&z: barrels) {
         z.tick();
@@ -377,7 +383,7 @@ void tick_elements() {
         chest1.broken = 1;
         ball1.position.z -= 10;
     }
-    if(detect_collision(chest1.shape, boat1.shape) and chest1.broken == 1) {
+    if(detect_collision(chest1.shape, boat1.humanShape) and chest1.broken == 1) {
         chest1.broken = 2;
         score += 1000;
     }
@@ -565,7 +571,7 @@ int main(int argc, char **argv) {
     while (!glfwWindowShouldClose(window)) {
         // Process timers
 
-        if (t60.processTick()) {
+        if(t60.processTick()) {
             // 60 fps
             ++cnt;
             // OpenGL Draw commands

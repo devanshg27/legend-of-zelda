@@ -21,9 +21,12 @@ public:
     void texturedDraw(glm::mat4 VP);
     void set_position(float x, float y);
     void tick();
+    void islandTick(sphereBounding shape, int chestBroken);
+    void islandDraw(glm::mat4 VP);
     double speed;
     boatBounding shape;
     sphereBounding sphereShape;
+    sphereBounding humanShape;
 private:
     VAO *object;
     VAO *mastObject;
@@ -31,6 +34,11 @@ private:
     VAO *baseObject;
     VAO *arrowObject;
     VAO *cannonObject;
+
+    VAO *faceObject;
+    VAO *shirtObject;
+    VAO *handObject;
+    VAO *footObject;
 };
 
 #endif // BOAT_H
