@@ -201,14 +201,14 @@ void draw() {
     if(!onIsland) boat1.texturedDraw(VP);
 }
 
-void startAudioPlayer() {
+void startAudioPlayer(std::string fileName, bool isRepeating) {
     int forkPid = fork();
     if(forkPid == -1) {
         printf("Error occurred during forking.\n");
         exit(0);
     }
     if( forkPid == 0 ) {
-        playAudio();
+        playAudio(fileName, isRepeating);
     }
 }
 
@@ -340,6 +340,7 @@ void tick_elements() {
     for(auto it = barrels.begin(); it != barrels.end();) {
         if(detect_collision(it->shape2, boat1.shape)) {
             score += 10;
+            startAudioPlayer("pickup.mp3", false);
             it = barrels.erase(it);
         }
         else if(detect_collision(it->shape, boat1.shape)) {
@@ -358,6 +359,7 @@ void tick_elements() {
     health -= (oldRocksSz - rocks.size())*5;
     for(auto it = healths.begin(); it != healths.end();) {
         if(detect_collision(it->shape, boat1.shape)) {
+            startAudioPlayer("pickup.mp3", false);
             if(health < 100) health = 100;
             else health += 10;
             it = healths.erase(it);
@@ -401,6 +403,7 @@ void tick_elements() {
     }
     if(detect_collision(chest1.shape, boat1.humanShape) and chest1.broken == 1) {
         chest1.broken = 2;
+        startAudioPlayer("pickup.mp3", false);
         score += 1000;
     }
     if(monsters.size() == numMonsters - nxtBoss){
@@ -410,6 +413,7 @@ void tick_elements() {
     for(auto it = boosters.begin(); it != boosters.end();) {
         if(detect_collision(it->shape, boat1.shape)) {
             boosterTimeLeft = 60 * 60;
+            startAudioPlayer("pickup.mp3", false);
             it = boosters.erase(it);
         }
         else {
@@ -519,6 +523,7 @@ void initGL(GLFWwindow *window, int width, int height) {
 }
 
 void cannonShoot() {
+    startAudioPlayer("cannon.mp3", false);
     nxtShootcnt = cnt + 180;
     ball1.position = boat1.position - glm::vec3(2.8*cos(PI * boat1.rotation / 180.0), 2.8*sin(PI * boat1.rotation / 180.0), -1.7);
     ball1.velocity.x = -cos(PI * boat1.rotation / 180.0);
@@ -576,7 +581,7 @@ int main(int argc, char **argv) {
     health = 100;
     cnt = 0, nxtShootcnt = -1;
 
-    startAudioPlayer();
+    startAudioPlayer("song.mp3", true);
 
     window = initGLFW(width, height);
 

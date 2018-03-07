@@ -40,3 +40,5 @@ configure_file(src/TextureFragmentShader.fragmentshader TextureFragmentShader.fr
 configure_file(assets/uvtemplate.dds uvtemplate.dds COPYONLY)
 configure_file(assets/dragon.dds dragon.dds COPYONLY)
 configure_file(assets/song.mp3 song.mp3 COPYONLY)
+configure_file(assets/cannon.mp3 cannon.mp3 COPYONLY)
+configure_file(assets/pickup.mp3 pickup.mp3 COPYONLY)

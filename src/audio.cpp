@@ -6,7 +6,7 @@
 
 #define BITS 8
 
-void playAudio(){
+void playAudio(std::string fileName, bool isRepeating){
     int r = prctl(PR_SET_PDEATHSIG, SIGTERM);
     if (r == -1) { perror(0); exit(1); }
     mpg123_handle *mh;
@@ -31,7 +31,7 @@ void playAudio(){
     buffer = (unsigned char*) malloc(buffer_size * sizeof(unsigned char));
 
     /* open the file and get the decoding format */
-    mpg123_open(mh, "song.mp3");
+    mpg123_open(mh, fileName.c_str());
     mpg123_getformat(mh, &rate, &channels, &encoding);
 
     /* set the output format and open the output device */
@@ -47,6 +47,7 @@ void playAudio(){
         while (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK) {
             ao_play(dev, (char *)buffer, done);
         }
+        if(!isRepeating) break;
         mpg123_seek(mh, 0, SEEK_SET);
     }
 
