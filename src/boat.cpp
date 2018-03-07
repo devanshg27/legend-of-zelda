@@ -15,6 +15,8 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColo
     this->oldMastScale = 1;
     this->mastScale = 1;
     this->cannonRotation = 0;
+    this->handAngle = 0;
+    this->handAngularVelocity = 1.7;
     GLfloat vertex_buffer_data[9*2*10*11];
     GLfloat base_vertex_buffer_data[9*2*2*10];
     GLfloat sail_vertex_buffer_data[9*2*10*1];
@@ -480,7 +482,7 @@ Boat::Boat(float x, float y, color_t color, color_t baseColor, color_t arrowColo
 
     this->faceObject = create3DObject(GL_TRIANGLES, 12*3, face_vertex_buffer_data, color_t{255,205,148}, GL_FILL);
     this->shirtObject = create3DObject(GL_TRIANGLES, 12*3, shirt_vertex_buffer_data, color_t{255, 53, 53}, GL_FILL);
-    this->handObject = create3DObject(GL_TRIANGLES, 12*3, hand_vertex_buffer_data, color_t{255,205,148}, GL_FILL);
+    this->handObject = create3DObject(GL_TRIANGLES, 12*3, hand_vertex_buffer_data, color_t{63, 81, 181}, GL_FILL);
     this->footObject = create3DObject(GL_TRIANGLES, 12*3, foot_vertex_buffer_data, color_t{255,205,148}, GL_FILL);
 }
 
@@ -495,6 +497,9 @@ void Boat::draw(glm::mat4 VP) {
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->object);
     draw3DObject(this->baseObject);
+    draw3DObject(this->faceObject);
+    draw3DObject(this->shirtObject);
+
     glm::mat4 arrowTranslate = glm::translate (glm::vec3(-7, 0, 0));
     glm::mat4 arrowRotate    = glm::rotate((float) ((this->windAngle-this->rotation) * M_PI / 180.0f), glm::vec3(0, 0, 1));
     glm::mat4 arrowTranslateinv = glm::translate (glm::vec3(7, 0, 0));
@@ -514,8 +519,6 @@ void Boat::draw(glm::mat4 VP) {
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->cannonObject);
-    draw3DObject(this->faceObject);
-    draw3DObject(this->shirtObject);
 
     Matrices.model = glm::mat4(1.0f);
     translate = glm::translate (this->position);    // glTranslatef
@@ -580,14 +583,14 @@ void Boat::islandDraw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
     translate = glm::translate (this->position);    // glTranslatef
     rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
-    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, -0.5, 0)));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(0, 0, +2.5)) * glm::rotate((this->handAngle*PI/-240), glm::vec3(0, 1, 0)) * glm::translate(glm::vec3(-2.5, -0.5, -2.5)));
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->handObject);
     Matrices.model = glm::mat4(1.0f);
     translate = glm::translate (this->position);    // glTranslatef
     rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
-    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, 0.5, 0)));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(0, 0, +2.5)) * glm::rotate((this->handAngle*PI/240), glm::vec3(0, 1, 0)) * glm::translate(glm::vec3(-2.5, 0.5, -2.5)));
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->handObject);
@@ -595,14 +598,14 @@ void Boat::islandDraw(glm::mat4 VP) {
     Matrices.model = glm::mat4(1.0f);
     translate = glm::translate (this->position);    // glTranslatef
     rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
-    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, -1, 0)));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(0, 0, +3.9)) * glm::rotate((this->handAngle*PI/180), glm::vec3(0, 1, 0)) * glm::translate(glm::vec3(-2.5, -1, -3.9)));
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->footObject);
     Matrices.model = glm::mat4(1.0f);
     translate = glm::translate (this->position);    // glTranslatef
     rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(0, 0, 1));
-    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(-2.5, 1, 0)));
+    Matrices.model *= (translate * rotate * glm::translate(glm::vec3(0, 0, +3.9)) * glm::rotate((this->handAngle*PI/-180), glm::vec3(0, 1, 0)) * glm::translate(glm::vec3(-2.5, 1, -3.9)));
     MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->footObject);
@@ -613,6 +616,9 @@ void Boat::set_position(float x, float y) {
 }
 
 void Boat::tick() {
+    if(fabs(handAngle) > 36) {
+        handAngularVelocity = -handAngularVelocity;
+    }
     if(cos((this->windAngle - this->rotation)*PI/180.0) > 0.3) {
         this->position.x -= (1 + cos((this->windAngle - this->rotation)*PI/180.0)) * velocity * cos(this->rotation * PI / 180.0f);
         this->position.y -= (1 + cos((this->windAngle - this->rotation)*PI/180.0)) * velocity * sin(this->rotation * PI / 180.0f);
@@ -651,10 +657,13 @@ void Boat::tick() {
 }
 
 void Boat::islandTick(sphereBounding shape2, int broken) {
+    if(fabs(handAngle) > 36) {
+        handAngularVelocity = -handAngularVelocity;
+    }
     auto oldPosition = this->position;
     this->position.x -= velocity * cos(this->rotation * PI / 180.0f);
     this->position.y -= velocity * sin(this->rotation * PI / 180.0f);
-    if(broken == 0 and 100-2 <= this->position.x and this->position.x <= 100+2 and 100-4 <= this->position.y and this->position.y <= 100+4) {
+    if(broken == 0 and 100-2.5 <= this->position.x and this->position.x <= 100+2.5 and 100-4.5 <= this->position.y and this->position.y <= 100+4.5) {
         this->position = oldPosition;
     }
     if(this->velocity > 0) {

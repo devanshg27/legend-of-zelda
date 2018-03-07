@@ -17,6 +17,7 @@ public:
     float mastScale, oldMastScale, mastRatio;
     float oldWindAngle, windRatio;
     float cannonRotation;
+    float handAngle, handAngularVelocity;
     void draw(glm::mat4 VP);
     void texturedDraw(glm::mat4 VP);
     void set_position(float x, float y);

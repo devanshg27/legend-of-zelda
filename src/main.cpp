@@ -63,6 +63,7 @@ int boosterTimeLeft = -1;
 // 2 = Tower View
 // 3 = Follow-cam View
 // 4 = Helicopter-cam View
+// 5 = Cinema View
 
 Timer t60(1.0 / 60);
 
@@ -96,8 +97,10 @@ void draw() {
     }
     else if(cameraView == 0) {
         eye = boat1.position;
-        eye.x -= 6*cos(PI * boat1.rotation / 180.0);
-        eye.y -= 6*sin(PI * boat1.rotation / 180.0);
+        if(!onIsland) eye.x -= 6*cos(PI * boat1.rotation / 180.0);
+        else eye.x -= 0.6*cos(PI * boat1.rotation / 180.0);
+        if(!onIsland) eye.y -= 6*sin(PI * boat1.rotation / 180.0);
+        else eye.y -= 0.6*sin(PI * boat1.rotation / 180.0);
         eye.z += 3;
         target = eye;
         target.x -= 2*cos(PI * boat1.rotation / 180.0);
@@ -131,6 +134,17 @@ void draw() {
     else if(cameraView == 4) {
         eye = curEye;
         target = curTarget;
+    }
+    else if(cameraView == 5) {
+        target = boat1.position;
+        target.z = 2;
+        if((curEye.x - target.x)*(curEye.x - target.x) + (curEye.y - target.y)*(curEye.y - target.y) > 100 * 100) {
+            float rad = rand()%81, ang = (rand()%360) * PI / 180.0;
+            curEye.x = target.x + rad * cos(ang);
+            curEye.y = target.y + rad * sin(ang);
+        }
+        eye = curEye;
+        eye.z = 60;
     }
     // Compute Camera matrix (view)
     Matrices.view = glm::lookAt( eye, target, up ); // Rotating Camera for 3D
@@ -206,9 +220,11 @@ void tick_input(GLFWwindow *window) {
     if(up) {
         boat1.velocity = 0.25;
         if(boosterTimeLeft>0) boat1.velocity = 0.4;
+        boat1.handAngle += boat1.handAngularVelocity;
     }
     if(down) {
         boat1.velocity = -0.15;
+        boat1.handAngle += -boat1.handAngularVelocity;
     }
     if(left) {
         boat1.rotation += 0.8;
@@ -282,7 +298,7 @@ void tick_input(GLFWwindow *window) {
 void tick_elements() {
     int dx = boat1.position.x - 100;
     int dy = boat1.position.y - 100;
-    onIsland = (dx * dx + dy * dy) <= 30.5 * 30.5;
+    onIsland = (dx * dx + dy * dy) <= 31 * 31;
     ball1.tick();
     for(auto&z: enemyBalls) {
         z.tick();
@@ -513,7 +529,7 @@ void cannonShoot() {
 void inputHandler(int key, int action) {
     if(key == GLFW_KEY_V) {
         if(action == GLFW_PRESS) {
-            cameraView = (cameraView + 1) % 5;
+            cameraView = (cameraView + 1) % 6;
         }
         else if(action == GLFW_RELEASE) {
             // Do something
