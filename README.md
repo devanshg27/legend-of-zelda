@@ -1,11 +1,34 @@
-Graphics Boilerplate Code
-=========================
+# Pacman Killer
 
-This is boilerplate code for the assignments which might be helpful.
+## Usage
+```sh
+mkdir build
+cd build
+cmake ..
+make
+./graphics_asgn2
+```
 
+## Controls
 
-License
--------
-The MIT License https://meghprkh.mit-license.org/
+`Arrow keys`: Move the boat around
 
-Copyright &copy; 2018 Megh Parikh <meghprkh@gmail.com>
+`Right click`: Aim the cannon at enemies
+
+`f`: Shoot the cannon
+
+`space`: Make the boat jump
+
+`v`: Change the camera mode
+
+`Mouse scroll/Click and drag`: Change the view in helicopter camera mode
+
+`q`: End the Game
+
+## Levels
+The game has 5 levels of progressively increasing difficulty:
+1. The player has to reach a score of 2000 points in 80 seconds.
+2. The player has to reach a score of 4000 points in 70 seconds, the magnet is introduced in this level to increase the difficulty.
+3. The player has to reach a score of 6000 points in 70 seconds, randomly spawning porcupines are introduced in this level to increase the difficulty.
+4. The player has to reach a score of 9000 points in 80 seconds.
+5. The player has to reach a score of 13000 points in 100 seconds.
